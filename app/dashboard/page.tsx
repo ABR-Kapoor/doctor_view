@@ -20,6 +20,8 @@ interface DashboardStats {
   todayAppointments: number;
   pendingRequests: number;
   activePrescriptions: number;
+  pendingApprovals: number;
+  monthlyRevenue: number;
 }
 
 export default function DoctorDashboard() {
@@ -28,6 +30,8 @@ export default function DoctorDashboard() {
     todayAppointments: 0,
     pendingRequests: 0,
     activePrescriptions: 0,
+    pendingApprovals: 0,
+    monthlyRevenue: 0,
   });
   const [appointmentsData, setAppointmentsData] = useState<any[]>([]);
   const [patientsData, setPatientsData] = useState<any[]>([]);
@@ -62,6 +66,8 @@ export default function DoctorDashboard() {
             totalPatients: data.totalPatients || 0,
             pendingRequests: data.pendingRequests || 0,
             activePrescriptions: data.activePrescriptions || 0,
+            pendingApprovals: data.pendingApprovals || 0,
+            monthlyRevenue: data.monthlyRevenue || 0,
           });
           setAppointmentsData(data.appointmentsData || []); // Keep fetching for charts
           setPatientsData(data.patientsData || []); // Keep fetching for charts
