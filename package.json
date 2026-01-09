@@ -9,7 +9,6 @@
         "lint": "next lint"
     },
     "dependencies": {
-        "@aurasutra/shared-lib": "*",
         "@google/generative-ai": "^0.24.1",
         "@kinde-oss/kinde-auth-nextjs": "^2.1.0",
         "@radix-ui/react-alert-dialog": "^1.0.5",
