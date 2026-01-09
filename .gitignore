@@ -1,0 +1,8 @@
+# Sub-folder gitignore
+node_modules/
+.next/
+out/
+build/
+.env*.local
+.env
+.vercel
