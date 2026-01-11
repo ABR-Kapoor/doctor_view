@@ -161,17 +161,19 @@ export default function DoctorVideoCallPage() {
           
           setShowPostCallModal(true);
         },
-        onJoinRoom: () => {
+        onJoinRoom: async () => {
           console.log('[DOCTOR] Successfully joined room!');
           clearTimeout(timeoutId);
-          const startTime = new Date();
+          
+          // Start call on server and get synchronized start time
+          const startTime = await startCall();
           setCallStartTime(startTime);
           
           // Start live timer (updates every second)
           const timer = setInterval(() => {
             const now = new Date();
             const elapsed = Math.floor((now.getTime() - startTime.getTime()) / 1000);
-            setCallDurationSeconds(elapsed);
+            setCallDurationSeconds(elapsed >= 0 ? elapsed : 0);
           }, 1000);
           setLiveTimerInterval(timer);
         },
@@ -199,6 +201,22 @@ export default function DoctorVideoCallPage() {
       setTimeout(() => {
         router.push('/dashboard/appointments');
       }, 3000);
+    }
+  }
+
+  async function startCall() {
+    try {
+      console.log('[DOCTOR] Notifying server: Call Started');
+      const response = await fetch(`/api/appointments/${aid}/start-call`, { method: 'POST' });
+      const data = await response.json();
+      
+      if (data.success && data.data?.call_started_at) {
+        return new Date(data.data.call_started_at);
+      }
+      return new Date(); // Fallback
+    } catch (error) {
+      console.error('[DOCTOR] Failed to start call on server:', error);
+      return new Date();
     }
   }
 

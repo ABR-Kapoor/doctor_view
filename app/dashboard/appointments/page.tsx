@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Calendar, Video, MapPin, Check, X, Clock, User, CheckCircle } from 'lucide-react';
+import { Calendar, Video, MapPin, Check, X, Clock, User, CheckCircle, ChevronDown, Phone, Mail, MoreVertical } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
@@ -44,6 +44,8 @@ export default function DoctorAppointmentsPage() {
     cancelled: [],
   });
   const [loading, setLoading] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [selectedSpecialization, setSelectedSpecialization] = useState<{doctor: string, specs: string[]} | null>(null);
 
   useEffect(() => {
     fetchAppointments();
@@ -55,6 +57,18 @@ export default function DoctorAppointmentsPage() {
       fetchAppointments();
     }
   }, [activeTab]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openDropdown) {
+        setOpenDropdown(null);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [openDropdown]);
 
   async function fetchAppointments() {
     try {
@@ -234,26 +248,29 @@ export default function DoctorAppointmentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Appointments</h1>
-        <p className="text-gray-600">Manage your patient consultations</p>
+      {/* Compact Header */}
+      <div className="mb-4">
+        <h1 className="text-3xl font-black text-gray-900 mb-1">Consultation Schedule</h1>
+        <p className="text-gray-600 text-sm">Manage your appointments and patient consultations</p>
       </div>
 
       {/* Tabs */}
-      <div className="glass-card p-2 rounded-xl inline-flex space-x-2">
+      <div className="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 inline-flex space-x-2 flex-wrap">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`px-6 py-3 rounded-lg font-medium smooth-transition ${
+            className={`px-6 py-3 rounded-xl text-sm font-bold transition-all ${
               activeTab === tab.id
-                ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-gradient-to-r from-primary-600 to-emerald-600 text-white shadow-md'
+                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
             {tab.label}
             {tab.count > 0 && (
-              <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-white/20">
+              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-black ${
+                activeTab === tab.id ? 'bg-white/20' : 'bg-primary-100 text-primary-600'
+              }`}>
                 {tab.count}
               </span>
             )}
@@ -268,188 +285,206 @@ export default function DoctorAppointmentsPage() {
           <p className="text-gray-500">No appointments in this category</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {currentAppointments.map((apt) => (
-            <div key={apt.aid} className="glass-card-hover p-6 rounded-2xl">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start space-x-4 flex-1">
-                  {/* Patient Profile Image */}
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {apt.patient?.user?.profile_image_url ? (
-                      <img
-                        src={apt.patient.user.profile_image_url}
-                        alt={apt.patient.user.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <User className="w-7 h-7 text-primary-600" />
-                    )}
-                  </div>
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-xl flex items-center justify-center">
-                    {apt.mode === 'online' ? (
-                      <Video className="w-7 h-7 text-primary-600" />
-                    ) : (
-                      <MapPin className="w-7 h-7 text-primary-600" />
-                    )}
-                  </div>
-                  
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-bold text-gray-900">
-                        {apt.patient?.user?.name || 'Patient'}
-                      </h3>
-                      {apt.payment_status === 'pending' && (
-                        <span className="px-2 py-1 bg-secondary-100 text-secondary-700 rounded-full text-xs font-medium flex items-center space-x-1">
-                          <Check className="w-3 h-3" />
-                          <span>Free Consultation</span>
-                        </span>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {currentAppointments.map((apt) => {
+            // Determine status color overlay
+            const getStatusOverlay = () => {
+              switch(apt.status) {
+                case 'confirmed': return 'bg-green-500/5';
+                case 'pending': return 'bg-amber-500/5';
+                case 'cancelled': return 'bg-red-500/5';
+                case 'completed': return 'bg-blue-500/5';
+                default: return 'bg-gray-500/5';
+              }
+            };
+            
+            const getStatusBorder = () => {
+              switch(apt.status) {
+                case 'confirmed': return 'border-green-200';
+                case 'pending': return 'border-amber-200';
+                case 'cancelled': return 'border-red-200';
+                case 'completed': return 'border-blue-200';
+                default: return 'border-gray-200';
+              }
+            };
+            
+            return (
+            <div 
+              key={apt.aid} 
+              className={`relative bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border-2 ${getStatusBorder()}`}
+            >
+              {/* Status Color Overlay */}
+              <div className={`absolute inset-0 ${getStatusOverlay()} pointer-events-none z-0`} />
+              
+              {/* Card Content */}
+              <div className="relative z-10 p-6 space-y-4">
+                {/* Patient Info Header */}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-4 flex-1">
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white shadow-md flex-shrink-0">
+                      {apt.patient?.user?.profile_image_url ? (
+                        <img
+                          src={apt.patient.user.profile_image_url}
+                          alt={apt.patient.user.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-primary-100 flex items-center justify-center">
+                          <User className="w-8 h-8 text-primary-600" />
+                        </div>
                       )}
                     </div>
-
-                    <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
-                      <span className="flex items-center space-x-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{new Date(apt.scheduled_date).toLocaleDateString()}</span>
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{apt.scheduled_time}</span>
-                      </span>
-                      <span className="capitalize px-2 py-1 bg-primary-100 text-primary-700 rounded-full text-xs">
-                        {apt.mode}
-                      </span>
-                    </div>
-
-                    {apt.complaint_description && (
-                      <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-medium">Complaint:</span> {apt.complaint_description}
-                      </p>
-                    )}
-
-                    {/* Detailed timing for completed appointments */}
-                    {activeTab === 'completed' && apt.duration_minutes && (
-                      <div className="mb-3 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>
-                            <p className="text-xs text-gray-600 font-medium mb-1">Start Time</p>
-                            <p className="text-sm text-gray-900 font-bold">{formatTime(apt.start_time)}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-600 font-medium mb-1">End Time</p>
-                            <p className="text-sm text-gray-900 font-bold">{formatTime(apt.end_time)}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-600 font-medium mb-1">Call Duration</p>
-                            <p className="text-sm text-green-700 font-bold">
-                              {Math.floor(apt.duration_minutes)} min {Math.round((apt.duration_minutes % 1) * 60)} sec
-                            </p>
-                          </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-gray-900 truncate">
+                        {apt.patient?.user?.name || 'Patient'}
+                      </h3>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <div className={`p-1.5 rounded-lg ${apt.mode === 'online' ? 'bg-blue-100' : 'bg-emerald-100'}`}>
+                          {apt.mode === 'online' ? <Video className="w-3 h-3 text-blue-600" /> : <MapPin className="w-3 h-3 text-emerald-600" />}
                         </div>
+                        <span className="text-xs font-bold text-gray-500 capitalize">{apt.mode}</span>
                       </div>
-                    )}
-
-                    {/* Simple duration badge for today's completed */}
-                    {activeTab === 'today' && apt.status === 'completed' && apt.duration_minutes && (
-                      <div className="mb-3 px-4 py-2 bg-green-100 rounded-lg">
-                        <p className="text-sm text-green-700 font-semibold">
-                          Call Duration: {Math.floor(apt.duration_minutes)} min
-                        </p>
-                      </div>
-                    )}
-
-                    <p className="text-xs text-gray-500">
-                      Contact: {apt.patient?.user?.phone || apt.patient?.user?.email}
-                    </p>
+                      {apt.patient?.user?.phone && (
+                        <div className="flex items-center space-x-1 mt-1 text-xs text-gray-500">
+                          <Phone className="w-3 h-3" />
+                          <span>{apt.patient.user.phone}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                    apt.status === 'confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
+                    apt.status === 'completed' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                    apt.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
+                    'bg-amber-50 text-amber-700 border-amber-200'
+                  }`}>
+                    {apt.status}
+                  </span>
+                </div>
+                
+                {/* Appointment Details */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Calendar className="w-4 h-4 text-gray-400" />
+                    <span className="font-medium text-gray-700">
+                      {new Date(apt.scheduled_date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Clock className="w-4 h-4 text-gray-400" />
+                    <span className="font-medium text-gray-700">{apt.scheduled_time}</span>
                   </div>
                 </div>
-
+                
+                {/* Complaint Description */}
+                {apt.complaint_description && (
+                  <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                    <p className="text-xs font-bold text-gray-400 mb-1">Patient's Complaint</p>
+                    <p className="text-sm text-gray-700 line-clamp-2">{apt.complaint_description}</p>
+                  </div>
+                )}
+                
                 {/* Actions */}
-                <div className="flex flex-col space-y-2 ml-4">
+                <div className="flex gap-2 pt-2">
                   {activeTab === 'pending' && (
                     <>
                       <button
                         onClick={() => updateAppointmentStatus(apt.aid, 'confirmed')}
-                        className="px-6 py-2 bg-gradient-to-r from-secondary-600 to-secondary-500 text-white rounded-lg hover:shadow-lg smooth-transition flex items-center space-x-2"
+                        className="flex-1 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold text-sm hover:shadow-lg transition-all flex items-center justify-center space-x-1"
                       >
                         <Check className="w-4 h-4" />
-                        <span>Approve</span>
+                        <span>Confirm</span>
                       </button>
                       <button
                         onClick={() => updateAppointmentStatus(apt.aid, 'cancelled')}
-                        className="px-6 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 smooth-transition flex items-center space-x-2"
+                        className="px-4 py-2.5 bg-red-50 text-red-600 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors"
                       >
-                        <X className="w-4 h-4" />
-                        <span>Reject</span>
+                        Decline
                       </button>
                     </>
                   )}
-                  {activeTab !== 'completed' && (
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => window.location.href = `/dashboard/patients/${apt.patient?.pid}`}
-                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 smooth-transition text-sm"
-                      >
-                        View Patient
-                      </button>
-                      
-                      {/* Status dropdown for confirmed/completed appointments */}
-                      {(apt.status === 'confirmed' || apt.status === 'completed') && (
-                        <select
-                          value={apt.status}
-                          onChange={(e) => changeStatus(apt.aid, e.target.value)}
-                          className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500/50"
-                        >
-                          <option value="confirmed">Confirmed</option>
-                          <option value="completed">Completed</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                      )}
-                      
-                      {/* Delete button */}
-                      <button
-                        onClick={() => deleteAppointment(apt.aid)}
-                        className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 smooth-transition text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
+                  
                   {activeTab === 'today' && apt.status !== 'completed' && (
-                    <>
-                      {apt.mode === 'online' ? (
-                        <button
-                          onClick={() => window.location.href = `/dashboard/video-call/${apt.aid}`}
-                          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl font-semibold hover:shadow-lg smooth-transition flex items-center space-x-2"
-                        >
-                          <Video className="w-5 h-5" />
-                          <span>Start Video Call</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => router.push(`/dashboard/prescriptions/new?aid=${apt.aid}`)}
-                          className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl font-bold hover:shadow-lg smooth-transition flex items-center space-x-2"
-                        >
-                          <CheckCircle className="w-5 h-5" />
-                          <span>Meeting Over</span>
-                        </button>
-                      )}
-                    </>
+                    <button
+                      onClick={() => {
+                        if (apt.mode === 'online') {
+                          window.location.href = `/dashboard/video-call/${apt.aid}`;
+                        } else {
+                          router.push(`/dashboard/prescriptions/new?aid=${apt.aid}`);
+                        }
+                      }}
+                      className="flex-1 py-2.5 bg-gradient-to-r from-primary-600 to-emerald-600 text-white rounded-xl font-bold text-sm hover:shadow-lg transition-all flex items-center justify-center space-x-1"
+                    >
+                      {apt.mode === 'online' ? <Video className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                      <span>{apt.mode === 'online' ? 'Start Call' : 'Complete Visit'}</span>
+                    </button>
                   )}
-                  {activeTab === 'today' && apt.status === 'completed' && (
-                    <div className="text-sm text-gray-500 italic">
-                      Call completed • Cannot reconnect
-                    </div>
-                  )}
-                  {/* Show duration badge in completed */}
-                  {activeTab === 'completed' && apt.duration_minutes && (
-                    <div className="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
-                      {Math.floor(apt.duration_minutes)} min call
-                    </div>
-                  )}
+                  
+                  <div className="relative">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenDropdown(openDropdown === apt.aid ? null : apt.aid);
+                      }}
+                      className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-200 transition-colors"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+                    
+                    {/* Dropdown Menu - Smart Positioning */}
+                    {openDropdown === apt.aid && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
+                        <div className="py-2">
+                          <button
+                            onClick={() => {
+                              setOpenDropdown(null);
+                              window.location.href = `/dashboard/patients/${apt.patient?.pid}`;
+                            }}
+                            className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            View Patient History
+                          </button>
+                          {apt.status !== 'completed' && (
+                            <button
+                              onClick={() => {
+                                setOpenDropdown(null);
+                                changeStatus(apt.aid, 'completed');
+                              }}
+                              className="w-full px-4 py-2 text-left text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                            >
+                              Mark as Completed
+                            </button>
+                          )}
+                          {apt.status !== 'cancelled' && (
+                            <button
+                              onClick={() => {
+                                setOpenDropdown(null);
+                                changeStatus(apt.aid, 'cancelled');
+                              }}
+                              className="w-full px-4 py-2 text-left text-sm font-medium text-amber-600 hover:bg-amber-50 transition-colors"
+                            >
+                              Cancel Appointment
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              setOpenDropdown(null);
+                              deleteAppointment(apt.aid);
+                            }}
+                            className="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100"
+                          >
+                            Delete Record
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          ))}
+          )})}
         </div>
       )}
     </div>

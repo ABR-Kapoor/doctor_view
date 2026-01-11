@@ -78,7 +78,7 @@ export default function HomePage() {
                 color: 'from-blue-500/10 to-primary-500/10',
               },
               {
-                icon: <Activity className="w-10 h-10 text-secondary-600" />,
+                icon: <img src="/Logos/logo_emblem_total black+transparent.png" alt="AuraSutra" className="h-10" />,
                 title: 'Progress Analytics',
                 description: 'Visualize patient adherence and treatment outcomes',
                 color: 'from-emerald-500/10 to-secondary-500/10',

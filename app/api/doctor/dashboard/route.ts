@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -41,9 +44,14 @@ export async function GET(request: NextRequest) {
             .eq('did', doctor.did);
 
         // Today's appointments
-        const today = new Date().toISOString().split('T')[0];
+        // Today's appointments (Timezone Safe)
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const todayString = `${year}-${month}-${day}`;
         const todayAppointments = allAppointments?.filter(
-            (apt) => apt.scheduled_date === today
+            (apt) => apt.scheduled_date === todayString
         ).length || 0;
 
         // Pending approvals (scheduled but not confirmed)

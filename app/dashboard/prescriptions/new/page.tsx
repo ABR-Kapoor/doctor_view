@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Pill, Plus, X, ArrowLeft, Sparkles, Loader2 } from 'lucide-react';
+import { Pill, Plus, X, ArrowLeft, Sparkles, Loader2, User, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Medicine {
@@ -20,7 +20,10 @@ export default function NewPrescriptionPage() {
   const aid = searchParams.get('aid');
   
   const [loading, setLoading] = useState(false);
+  const [patients, setPatients] = useState<any[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState(pid || '');
   const [patientName, setPatientName] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [diagnosis, setDiagnosis] = useState('');
   const [symptoms, setSymptoms] = useState('');
   const [medicines, setMedicines] = useState<Medicine[]>([
@@ -32,14 +35,43 @@ export default function NewPrescriptionPage() {
   const [aiGenerating, setAiGenerating] = useState(false);
 
   useEffect(() => {
-    if (pid) {
+    fetchPatients();
+  }, []);
+
+  useEffect(() => {
+    if (selectedPatientId) {
       fetchPatientName();
     }
-  }, [pid]);
+  }, [selectedPatientId]);
+
+  async function fetchPatients() {
+    try {
+      const syncResponse = await fetch('/api/sync-user');
+      const { user } = await syncResponse.json();
+
+      if (!user) return;
+
+      // Get doctor profile
+      const profileResponse = await fetch(`/api/doctor/profile?uid=${user.uid}`);
+      const profileData = await profileResponse.json();
+      
+      if (!profileData.success) return;
+
+      // Fetch doctor's patients
+      const response = await fetch(`/api/doctor/patients?did=${profileData.doctor.did}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setPatients(data.patients || []);
+      }
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+    }
+  }
 
   async function fetchPatientName() {
     try {
-      const response = await fetch(`/api/doctor/patients/${pid}`);
+      const response = await fetch(`/api/doctor/patients/${selectedPatientId}`);
       const data = await response.json();
       if (data.success && data.patient) {
         setPatientName(data.patient.user.name);
@@ -66,8 +98,8 @@ export default function NewPrescriptionPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     
-    if (!pid) {
-      toast.error('Patient ID is required');
+    if (!selectedPatientId) {
+      toast.error('Please select a patient');
       return;
     }
 
@@ -95,7 +127,7 @@ export default function NewPrescriptionPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          pid,
+          pid: selectedPatientId,
           did: profileData.doctor.did,
           aid: aid || null,
           diagnosis,
@@ -124,8 +156,8 @@ export default function NewPrescriptionPage() {
   }
 
   async function generateWithAI() {
-    if (!pid) {
-      toast.error('Patient ID is required for AI generation');
+    if (!selectedPatientId) {
+      toast.error('Please select a patient for AI generation');
       return;
     }
 
@@ -134,7 +166,7 @@ export default function NewPrescriptionPage() {
       const response = await fetch('/api/ai/generate-prescription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pid, aid: aid || null }),
+        body: JSON.stringify({ pid: selectedPatientId, aid: aid || null }),
       });
 
       const data = await response.json();
@@ -213,16 +245,89 @@ export default function NewPrescriptionPage() {
         </div>
       )}
 
+      {/* Patient Selector */}
+      {!pid && (
+        <div className="glass-card p-6 rounded-2xl">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
+            <User className="w-5 h-5 text-primary-600" />
+            <span>Select Patient</span>
+          </h2>
+          
+          <div className="space-y-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search patients by name..."
+                className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              />
+            </div>
+            
+            {/* Patient List */}
+            <div className="max-h-64 overflow-y-auto space-y-2">
+              {patients
+                .filter(p => p.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()))
+                .map((patient) => (
+                  <button
+                    key={patient.pid}
+                    type="button"
+                    onClick={() => {
+                      setSelectedPatientId(patient.pid);
+                      setSearchTerm('');
+                    }}
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
+                      selectedPatientId === patient.pid
+                        ? 'border-primary-500 bg-primary-50'
+                        : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                        {patient.user?.profile_image_url ? (
+                          <img
+                            src={patient.user.profile_image_url}
+                            alt={patient.user.name}
+                            className="w-full h-full rounded-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-5 h-5 text-primary-600" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-gray-900">{patient.user?.name}</p>
+                        <p className="text-sm text-gray-500">{patient.user?.email}</p>
+                      </div>
+                      {selectedPatientId === patient.pid && (
+                        <div className="w-5 h-5 bg-primary-600 rounded-full flex items-center justify-center">
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              {patients.filter(p => p.user?.name?.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                <p className="text-center text-gray-500 py-8">No patients found</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* AI Generation Button */}
       <button
         type="button"
         onClick={generateWithAI}
-        disabled={aiGenerating || !pid}
+        disabled={aiGenerating || !selectedPatientId}
         className="w-full p-6 glass-card rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold text-lg smooth-transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
       >
         <Sparkles className="w-6 h-6" />
         <span>Generate with Dr. Manas AI</span>
-        {!pid && <span className="text-sm font-normal">(Requires Patient ID)</span>}
+        {!selectedPatientId && <span className="text-sm font-normal">(Select a patient first)</span>}
       </button>
 
       <form onSubmit={handleSubmit} className="space-y-6">

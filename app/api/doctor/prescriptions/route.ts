@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Use service role key for prescriptions to bypass RLS
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

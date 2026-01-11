@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -71,12 +74,20 @@ export async function GET(request: NextRequest) {
         }));
 
         // Categorize appointments
+        // Logic that respects local timezone for 'today'
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const todayString = `${year}-${month}-${day}`;
+
+        // Categorize appointments
         const pending = enrichedAppointments.filter((apt) => apt.status === 'scheduled') || [];
         const confirmed = enrichedAppointments.filter(
-            (apt) => apt.status === 'confirmed' && apt.scheduled_date !== today
+            (apt) => apt.status === 'confirmed' && apt.scheduled_date !== todayString
         ) || [];
         const todayAppts = enrichedAppointments.filter(
-            (apt) => apt.scheduled_date === today && apt.status !== 'cancelled'
+            (apt) => apt.scheduled_date === todayString && (['confirmed', 'in_progress', 'scheduled'].includes(apt.status))
         ) || [];
         const completed = enrichedAppointments.filter((apt) => apt.status === 'completed') || [];
         const cancelled = enrichedAppointments.filter((apt) => apt.status === 'cancelled') || [];

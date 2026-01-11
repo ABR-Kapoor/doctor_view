@@ -31,14 +31,12 @@ export default async function DoctorDashboardLayout({
       {/* Sidebar */}
       <aside className="w-64 glass-card border-r border-gray-200/50 min-h-screen sticky top-0 flex flex-col">
         <div className="p-6">
-          <Link href="/dashboard" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">A</span>
+          <Link href="/dashboard" className="flex flex-col items-center space-y-2">
+            <div className="flex items-center space-x-1">
+              <img src="/Logos/logo_transparent.png" alt="AuraSutra" className="h-12" />
+              <span className="text-2xl font-semibold" style={{ fontFamily: 'Alatsi, sans-serif' }}>AuraSutra</span>
             </div>
-            <div>
-              <span className="text-xl font-bold gradient-text block">AuraSutra</span>
-              <span className="text-xs text-gray-600">Doctor Portal</span>
-            </div>
+            <span className="text-xs text-gray-600 font-semibold">Doctor Portal</span>
           </Link>
         </div>
 
