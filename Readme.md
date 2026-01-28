@@ -1,153 +1,144 @@
-## ✨ Features
+# AuraSutra Doctor Portal
 
-### 📊 Dashboard & Analytics
-- **Real-time Statistics**: View patient counts, appointments, and earnings
-- **Today's Schedule**: Quick view of today's appointments
-- **Performance Metrics**: Track consultation completion rates
-- **Revenue Analytics**: Monitor earnings and payment history
-- **Patient Overview**: Recent patient interactions
+A comprehensive doctor portal for the AuraSutra Ayurvedic healthcare platform.
 
-### 👥 Patient Management
-- **Patient Records**: Complete medical history access
-- **Patient Search**: Quick search and filter capabilities
-- **Medical History**: View detailed patient health records
-- **Medication Adherence**: Track patient adherence to medication
-- **Treatment Plans**: Create and track treatment protocols
-- **Prescription History**: Access past prescriptions
+## 🚀 Features
 
-### 📅 Appointment Management
-- **Appointment Queue**: Manage pending, confirmed, and today's appointments
-- **Status Tracking**: Real-time appointment status updates
-- **Token System**: Queue management for offline appointments
-- **Rescheduling**: Easy appointment rescheduling
-- **Appointment Filters**: Filter by status, date, type
-- **Calendar View**: Visual appointment scheduling
+- **Dashboard**: Overview of appointments, patients, and statistics
+- **Appointment Management**: View, confirm, and manage patient appointments
+- **Patient Records**: Access patient information and medical history
+- **Prescription Management**: Create and manage prescriptions
+- **Video Consultations**: Integrated video calling for online appointments
+- **Profile Management**: Update professional information and credentials
 
-### 💬 Video Consultations
-- **HD Video Calls**: ZegoCloud-powered video consultations
-- **Screen Sharing**: Share medical images and documents
-- **Call Recording**: Record consultations (with consent)
-- **In-call Notes**: Take notes during consultations
-- **Prescription Creation**: Create prescriptions during calls
+## 📋 Prerequisites
 
-### 📝 Prescription Management
-- **Digital Prescriptions**: Create and manage e-prescriptions
-- **Medicine Database**: Quick access to medicine information
-- **Custom Templates**: Save frequently used prescription templates
-- **Dosage Guidelines**: Standard dosage recommendations
-- **Follow-up Scheduling**: Schedule follow-up appointments
+- Node.js 18+ and npm
+- Supabase account and database
+- Kinde authentication account
+- ZegoCloud account (for video calls)
+- Google Gemini API key (for AI features)
 
-### 🔔 Notifications & Updates
-- **Real-time Alerts**: Instant appointment notifications
-- **Patient Updates**: Get notified of patient queries
-- **System Notifications**: Platform updates and announcements
+## 🛠️ Setup Instructions
 
-## 🛠️ Tech Stack
+### 1. Install Dependencies
 
-### Frontend
-- **Framework**: Next.js 14.0.4
-- **Language**: TypeScript 5.3.3
-- **Styling**: TailwindCSS 3.4.0
-- **UI Components**: Custom components
-- **Icons**: Lucide React
-- **Notifications**: React Hot Toast
+```bash
+npm install
+```
 
-### Backend & Services
-- **Database**: PostgreSQL (via Supabase)
+### 2. Database Setup
+
+1. Create a Supabase project at [supabase.com](https://supabase.com)
+2. Run the SQL scripts in order:
+   - `Project_DB.sql` - Creates tables and schema
+   - `Project_DB_Functions.sql` - Creates functions and triggers
+
+### 3. Environment Variables
+
+Copy `.env.local` and update with your credentials:
+
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Kinde Auth
+KINDE_CLIENT_ID=your_client_id
+KINDE_CLIENT_SECRET=your_client_secret
+KINDE_ISSUER_URL=https://your-domain.kinde.com
+KINDE_SITE_URL=http://localhost:3001
+KINDE_POST_LOGOUT_REDIRECT_URL=http://localhost:3001
+KINDE_POST_LOGIN_REDIRECT_URL=http://localhost:3001/dashboard
+
+# ZegoCloud Video
+NEXT_PUBLIC_ZEGO_APP_ID=your_app_id
+NEXT_PUBLIC_ZEGO_SERVER_SECRET=your_server_secret
+
+# Google Gemini AI
+GOOGLE_API_KEY=your_gemini_api_key
+
+# Razorpay Payments (Optional)
+NEXT_PUBLIC_RAZORPAY_KEY_ID=your_key_id
+RAZORPAY_KEY_SECRET=your_key_secret
+```
+
+### 4. Run Development Server
+
+```bash
+npm run dev
+```
+
+The application will be available at [http://localhost:3001](http://localhost:3001)
+
+## 📁 Project Structure
+
+```
+doctor_view/
+├── app/                    # Next.js app directory
+│   ├── api/               # API routes
+│   ├── dashboard/         # Doctor dashboard pages
+│   ├── page.tsx           # Landing page
+│   └── layout.tsx         # Root layout
+├── lib/                   # Shared utilities
+│   └── shared/           # Database and auth helpers
+├── public/               # Static assets
+├── Logos/                # Logo files
+├── .env.local           # Environment variables
+├── Project_DB.sql       # Database schema
+└── Project_DB_Functions.sql  # Database functions
+```
+
+## 🎨 Key Pages
+
+- **/** - Doctor portal landing page
+- **/dashboard** - Doctor dashboard with stats
+- **/dashboard/appointments** - Manage appointments
+- **/dashboard/patients** - View patient records
+- **/dashboard/prescriptions** - Manage prescriptions
+- **/dashboard/profile** - Update profile
+- **/dashboard/video-call/[id]** - Video consultation
+
+## 🔧 Tech Stack
+
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Database**: Supabase (PostgreSQL)
 - **Authentication**: Kinde Auth
-- **Video**: ZegoCloud WebRTC
-- **Real-time**: Supabase Subscriptions
-- **Shared Library**: `@aurasutra/shared-lib`
+- **Video Calls**: ZegoCloud
+- **AI**: Google Gemini
+- **UI Components**: Radix UI, Lucide Icons
 
-### Development Tools
-- **Linting**: ESLint
-- **Type Checking**: TypeScript
-- **Formatting**: Prettier (optional)
+## 📦 Build for Production
 
-## 📖 Usage Guide
-
-### Doctor Registration Flow
-```
-1. Visit http://localhost:3001
-2. Click "Sign Up" → Register via Kinde
-3. Complete doctor verification form:
-   - Medical license number
-   - Specialization certificates
-   - Identification documents
-4. Wait for admin approval (for now supabase manually approve)
-5. Access doctor dashboard
+```bash
+npm run build
+npm start
 ```
 
-### Managing Appointments
+## 🚀 Deployment
 
-#### View Appointments
-```
-1. Go to "Appointments" in navigation
-2. View appointments in tabs:
-   - Pending: New requests awaiting approval
-   - Confirmed: Approved appointments
-   - Rescheduled: Rescheduled by you or patient
-   - Today: All appointments for today
-3. Click appointment to view details
-```
+See `vercel_deployment_guide.md` for detailed Vercel deployment instructions.
 
-#### Approve Appointment
-```
-1. Go to "Pending" tab
-2. Review patient details and symptoms
-3. Click "Approve" to confirm
-4. System sends notification to patient
-```
+### Quick Deploy to Vercel
 
-#### Reschedule Appointment
-```
-1. Click "Reschedule" on appointment card
-2. Select new date and time
-3. Add reason for rescheduling
-4. Confirm rescheduling
-5. Patient receives notification
-```
+1. Import this directory as a new project
+2. Set all environment variables
+3. Deploy!
 
-#### Start Video Consultation
-```
-1. Go to "Today's Appointments"
-2. Find confirmed online appointment
-3. Click "Start Video Call" (15 min before)
-4. Wait for patient to join
-5. Conduct consultation
-6. Create prescription during/after call
-7. End consultation
-```
+## 🔐 Security Notes
 
-### Creating Prescriptions
+- Never commit `.env.local` to git
+- Keep service role keys secure
+- Update Kinde callback URLs for production
+- Enable RLS policies in Supabase
 
-```
-1. During or after appointment
-2. Click "Create Prescription with AI" (use prescription_gen_Doc)
-    - AI will generate prescription based on symptoms and patient history
-    - Doctor can review and modify the prescription
-3. Doctor can also create prescription manually
-   - Fill prescription form:
-    - Search and add medicines
-    - Specify dosage and frequency
-    - Add instructions
-    - Set validity period
-4. Review and submit
-5. Patient receives digital prescription
-```
+## 📝 License
 
-### Viewing Patient Records
+Private - AuraSutra Healthcare Platform
 
-```
-1. Go to "Patients"
-2. Search for patient
-3. Click to view profile:
-   - Personal information
-   - Medical history
-   - Past appointments
-   - Appointment history
-   - Financial history
-   - Previous prescriptions
-   - Test results
-4. Add notes or update records
-```
+## 🤝 Support
+
+For issues or questions, contact the development team.
