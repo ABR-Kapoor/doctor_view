@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Pill, Send, TrendingUp, Edit, Clock, Trash, Plus, ChevronDown, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { TranslatedText } from '../../components/TranslatedText';
 
 interface Prescription {
   prescription_id: string;
@@ -172,15 +173,15 @@ export default function DoctorPrescriptionsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Prescriptions</h1>
-          <p className="text-gray-600 mt-1">Manage patient prescriptions</p>
+          <h1 className="text-3xl font-bold text-gray-900"><TranslatedText>Prescriptions</TranslatedText></h1>
+          <p className="text-gray-600 mt-1"><TranslatedText>Manage patient prescriptions</TranslatedText></p>
         </div>
         <Link
           href="/dashboard/prescriptions/new"
           className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-semibold hover:shadow-lg smooth-transition flex items-center space-x-2"
         >
           <Plus className="w-5 h-5" />
-          <span>New Prescription</span>
+          <span><TranslatedText>New Prescription</TranslatedText></span>
         </Link>
       </div>
 
@@ -191,7 +192,7 @@ export default function DoctorPrescriptionsPage() {
             <div className="p-2 bg-orange-100 rounded-lg">
               <Clock className="w-5 h-5 text-orange-600" />
             </div>
-            <span>Draft Prescriptions ({draftPrescriptions.length})</span>
+            <span><TranslatedText>Draft Prescriptions</TranslatedText> ({draftPrescriptions.length})</span>
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             {draftPrescriptions.map((prescription) => (
@@ -215,19 +216,19 @@ export default function DoctorPrescriptionsPage() {
                       )}
                    </div>
                    <h3 className="font-bold text-lg text-gray-900 text-center px-4 truncate w-full">
-                     {prescription.patients?.users?.name || 'Unknown Patient'}
+                     <TranslatedText>{prescription.patients?.users?.name || 'Unknown Patient'}</TranslatedText>
                    </h3>
-                   <p className="text-sm text-gray-500 mt-1">{prescription.diagnosis}</p>
+                   <p className="text-sm text-gray-500 mt-1"><TranslatedText>{prescription.diagnosis}</TranslatedText></p>
                    
                    <span className="absolute top-4 right-4 px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-full">
-                     DRAFT
+                     <TranslatedText>DRAFT</TranslatedText>
                    </span>
                 </div>
 
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-6 text-center">
-                    <p className="text-white font-medium mb-1">Created {new Date(prescription.created_at).toLocaleDateString()}</p>
-                    <p className="text-gray-200 text-sm mb-6">{prescription.medicines.length} Medicines</p>
+                    <p className="text-white font-medium mb-1"><TranslatedText>Created</TranslatedText> {new Date(prescription.created_at).toLocaleDateString()}</p>
+                    <p className="text-gray-200 text-sm mb-6">{prescription.medicines.length} <TranslatedText>Medicines</TranslatedText></p>
                     
                     <div className="flex flex-col space-y-3 w-full max-w-xs">
                        <button
@@ -235,7 +236,7 @@ export default function DoctorPrescriptionsPage() {
                          className="py-2.5 px-4 bg-white text-gray-900 rounded-xl font-bold hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2"
                        >
                          <Edit className="w-4 h-4" />
-                         <span>Edit Draft</span>
+                         <span><TranslatedText>Edit Draft</TranslatedText></span>
                        </button>
                        <button
                          onClick={() => sendPrescription(prescription.prescription_id)}
@@ -243,14 +244,14 @@ export default function DoctorPrescriptionsPage() {
                          className="py-2.5 px-4 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 transition-colors flex items-center justify-center space-x-2 disabled:opacity-70"
                        >
                          <Send className="w-4 h-4" />
-                         <span>{sendingId === prescription.prescription_id ? 'Sending...' : 'Send Now'}</span>
+                         <span><TranslatedText>{sendingId === prescription.prescription_id ? 'Sending...' : 'Send Now'}</TranslatedText></span>
                        </button>
                        <button
                          onClick={() => deletePrescription(prescription.prescription_id)}
                          className="py-2 px-4 text-red-300 hover:text-red-200 text-sm font-medium transition-colors flex items-center justify-center space-x-2"
                        >
                          <Trash className="w-4 h-4" />
-                         <span>Delete</span>
+                         <span><TranslatedText>Delete</TranslatedText></span>
                        </button>
                     </div>
                 </div>
@@ -266,15 +267,15 @@ export default function DoctorPrescriptionsPage() {
           <div className="p-2 bg-primary-100 rounded-lg">
             <Pill className="w-5 h-5 text-primary-600" />
           </div>
-          <span>Sent Prescriptions ({sentPrescriptions.length})</span>
+          <span><TranslatedText>Sent Prescriptions</TranslatedText> ({sentPrescriptions.length})</span>
         </h2>
         
         {sentPrescriptions.length === 0 ? (
           <div className="text-center py-16 bg-white/50 rounded-3xl border border-dashed border-gray-200">
             <Pill className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">No sent prescriptions yet</p>
+            <p className="text-gray-500 text-lg"><TranslatedText>No sent prescriptions yet</TranslatedText></p>
             <Link href="/dashboard/prescriptions/new" className="text-primary-600 hover:underline mt-2 inline-block">
-              Create your first prescription
+              <TranslatedText>Create your first prescription</TranslatedText>
             </Link>
           </div>
         ) : (
@@ -308,10 +309,10 @@ export default function DoctorPrescriptionsPage() {
                  {/* Bottom Name Label (Always Visible) */}
                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white translate-y-2 group-hover:translate-y-full transition-transform duration-300 flex flex-col justify-end h-full">
                     <h3 className="font-bold text-2xl mb-1 drop-shadow-md">
-                       {prescription.patients?.users?.name || 'Unknown Patient'}
+                       <TranslatedText>{prescription.patients?.users?.name || 'Unknown Patient'}</TranslatedText>
                     </h3>
                     <p className="text-white/80 text-sm font-medium leading-snug break-words drop-shadow-sm">
-                       {prescription.diagnosis}
+                       <TranslatedText>{prescription.diagnosis}</TranslatedText>
                     </p>
                  </div>
 
@@ -324,8 +325,8 @@ export default function DoctorPrescriptionsPage() {
                            <div className="w-full h-full bg-gray-200"></div>
                         )}
                     </div>
-                    <h3 className="text-white font-black text-3xl mb-2">{prescription.patients?.users?.name}</h3>
-                    <p className="text-primary-100 text-lg font-bold mb-8">{prescription.medicines.length} Medicines • Active</p>
+                    <h3 className="text-white font-black text-3xl mb-2"><TranslatedText>{prescription.patients?.users?.name}</TranslatedText></h3>
+                    <p className="text-primary-100 text-lg font-bold mb-8">{prescription.medicines.length} <TranslatedText>Medicines</TranslatedText> • <TranslatedText>Active</TranslatedText></p>
 
                     <div className="flex flex-col space-y-3 w-full max-w-[200px]">
                         <button
@@ -336,7 +337,7 @@ export default function DoctorPrescriptionsPage() {
                           className="w-full py-3 px-4 bg-white text-primary-900 rounded-xl font-bold hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2"
                         >
                           <TrendingUp className="w-4 h-4" />
-                          <span>Open Details</span>
+                          <span><TranslatedText>Open Details</TranslatedText></span>
                         </button>
                         
                         <div className="grid grid-cols-2 gap-3">
@@ -379,8 +380,8 @@ export default function DoctorPrescriptionsPage() {
                        )}
                     </div>
                     <div>
-                       <h2 className="text-2xl font-bold text-gray-900">{selectedPrescription.patients?.users?.name}</h2>
-                       <p className="text-gray-500 text-sm">Diagnosis: {selectedPrescription.diagnosis}</p>
+                       <h2 className="text-2xl font-bold text-gray-900"><TranslatedText>{selectedPrescription.patients?.users?.name}</TranslatedText></h2>
+                       <p className="text-gray-500 text-sm"><TranslatedText>Diagnosis</TranslatedText>: <TranslatedText>{selectedPrescription.diagnosis}</TranslatedText></p>
                     </div>
                  </div>
                  <button 
@@ -406,7 +407,7 @@ export default function DoctorPrescriptionsPage() {
                           }`}
                         >
                           <Calendar className="w-4 h-4" />
-                          View Schedule
+                          <TranslatedText>View Schedule</TranslatedText>
                         </button>
                         <button
                           onClick={() => {
@@ -420,7 +421,7 @@ export default function DoctorPrescriptionsPage() {
                           }`}
                         >
                           <TrendingUp className="w-4 h-4" />
-                          Progress & Stats
+                          <TranslatedText>Progress & Stats</TranslatedText>
                         </button>
                     </div>
                   </div>
@@ -433,7 +434,7 @@ export default function DoctorPrescriptionsPage() {
                              <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                                    <Pill className="w-5 h-5 text-primary-500" />
-                                   Prescribed Medicines
+                                   <TranslatedText>Prescribed Medicines</TranslatedText>
                                 </h3>
                              </div>
 
@@ -441,7 +442,7 @@ export default function DoctorPrescriptionsPage() {
                                 {selectedPrescription.medicines.map((med: any, idx: number) => (
                                    <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
                                       <div>
-                                         <p className="font-bold text-gray-900">{med.name}</p>
+                                         <p className="font-bold text-gray-900"><TranslatedText>{med.name}</TranslatedText></p>
                                          <p className="text-sm text-gray-500">{med.dosage} • {med.frequency}</p>
                                       </div>
                                       <div className="text-right">
@@ -457,8 +458,8 @@ export default function DoctorPrescriptionsPage() {
                           {/* Instructions Block */}
                           {selectedPrescription.instructions && (
                              <div className="p-5 bg-yellow-50 rounded-2xl border border-yellow-100">
-                                <h4 className="font-bold text-yellow-800 mb-2 text-sm uppercase tracking-wide">Your Instructions</h4>
-                                <p className="text-yellow-900 leading-relaxed">{selectedPrescription.instructions}</p>
+                                <h4 className="font-bold text-yellow-800 mb-2 text-sm uppercase tracking-wide"><TranslatedText>Your Instructions</TranslatedText></h4>
+                                <p className="text-yellow-900 leading-relaxed"><TranslatedText>{selectedPrescription.instructions}</TranslatedText></p>
                              </div>
                           )}
                       </div>
@@ -467,7 +468,7 @@ export default function DoctorPrescriptionsPage() {
                         {loadingStats ? (
                            <div className="text-center py-24">
                               <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-                              <p className="text-gray-500 font-medium">Fetching patient progress...</p>
+                              <p className="text-gray-500 font-medium"><TranslatedText>Fetching patient progress...</TranslatedText></p>
                            </div>
                         ) : stats[selectedPrescription.prescription_id] ? (
                            <div className="grid md:grid-cols-2 gap-6">
@@ -490,21 +491,21 @@ export default function DoctorPrescriptionsPage() {
                                     </svg>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                                        <span className="text-5xl font-black text-gray-900 tracking-tight">{stats[selectedPrescription.prescription_id]?.overallPercentage}%</span>
-                                       <span className="text-xs text-gray-500 font-bold uppercase tracking-wider mt-1">Adherence</span>
+                                       <span className="text-xs text-gray-500 font-bold uppercase tracking-wider mt-1"><TranslatedText>Adherence</TranslatedText></span>
                                     </div>
                                  </div>
                                  <div className="grid grid-cols-3 gap-4 w-full text-center">
                                     <div className="p-3 bg-gray-50 rounded-xl">
                                        <div className="text-2xl font-bold text-gray-900">{stats[selectedPrescription.prescription_id]?.totalDoses}</div>
-                                       <div className="text-xs text-gray-500 font-medium">Total Doses</div>
+                                       <div className="text-xs text-gray-500 font-medium"><TranslatedText>Total Doses</TranslatedText></div>
                                     </div>
                                     <div className="p-3 bg-green-50 rounded-xl text-green-700">
                                        <div className="text-2xl font-bold">{stats[selectedPrescription.prescription_id]?.takenDoses}</div>
-                                       <div className="text-xs font-medium opacity-80">Taken</div>
+                                       <div className="text-xs font-medium opacity-80"><TranslatedText>Taken</TranslatedText></div>
                                     </div>
                                     <div className="p-3 bg-red-50 rounded-xl text-red-700">
                                        <div className="text-2xl font-bold">{stats[selectedPrescription.prescription_id]?.skippedDoses}</div>
-                                       <div className="text-xs font-medium opacity-80">Skipped</div>
+                                       <div className="text-xs font-medium opacity-80"><TranslatedText>Skipped</TranslatedText></div>
                                     </div>
                                  </div>
                               </div>
@@ -513,15 +514,15 @@ export default function DoctorPrescriptionsPage() {
                               <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                                  <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
                                     <Pill className="w-5 h-5 text-gray-400" />
-                                    Detailed Breakdown
+                                    <TranslatedText>Detailed Breakdown</TranslatedText>
                                  </h3>
                                  <div className="space-y-6">
                                      {stats[selectedPrescription.prescription_id]?.breakdown?.map((med: any, idx: number) => (
                                         <div key={idx} className="group">
                                            <div className="flex justify-between items-end mb-2">
                                               <div>
-                                                 <span className="font-bold text-gray-700 block text-sm">{med.medicineName}</span>
-                                                 <span className="text-xs text-gray-400 font-medium">{med.taken}/{med.total} doses</span>
+                                                 <span className="font-bold text-gray-700 block text-sm"><TranslatedText>{med.medicineName}</TranslatedText></span>
+                                                 <span className="text-xs text-gray-400 font-medium">{med.taken}/{med.total} <TranslatedText>doses</TranslatedText></span>
                                               </div>
                                               <span className="font-bold text-primary-600 text-lg">{med.percentage}%</span>
                                            </div>
@@ -539,7 +540,7 @@ export default function DoctorPrescriptionsPage() {
                                         </div>
                                      ))}
                                      {(!stats[selectedPrescription.prescription_id]?.breakdown || stats[selectedPrescription.prescription_id]?.breakdown.length === 0) && (
-                                         <p className="text-center text-gray-400 py-4">No data available for individual medicines.</p>
+                                         <p className="text-center text-gray-400 py-4"><TranslatedText>No data available for individual medicines.</TranslatedText></p>
                                      )}
                                  </div>
                               </div>
@@ -549,7 +550,7 @@ export default function DoctorPrescriptionsPage() {
                               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                   <TrendingUp className="w-8 h-8 text-gray-300" />
                               </div>
-                              <p className="text-gray-500 font-medium">No progress data available yet.</p>
+                              <p className="text-gray-500 font-medium"><TranslatedText>No progress data available yet.</TranslatedText></p>
                            </div>
                         )}
                       </div>

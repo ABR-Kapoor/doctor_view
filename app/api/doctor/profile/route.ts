@@ -58,16 +58,35 @@ export async function PATCH(request: NextRequest) {
 
         // Update user table
         if (user) {
+            // Build update object dynamically to avoid unnecessary updates
+            const updateData: any = {
+                name: user.name,
+            };
+
+            // Only include phone if provided and not empty
+            if (user.phone && user.phone.trim() !== '') {
+                updateData.phone = user.phone;
+            }
+
+            // Only include profile_image_url if provided
+            if (user.profile_image_url !== undefined) {
+                updateData.profile_image_url = user.profile_image_url;
+            }
+
             const { error: userError } = await supabase
                 .from('users')
-                .update({
-                    name: user.name,
-                    phone: user.phone,
-                    profile_image_url: user.profile_image_url, // Added support for profile image
-                })
+                .update(updateData)
                 .eq('uid', uid);
 
-            if (userError) throw userError;
+            if (userError) {
+                // Handle duplicate phone error with friendly message
+                if (userError.code === '23505' && userError.message.includes('phone')) {
+                    return NextResponse.json({ 
+                        error: 'This phone number is already registered to another user.' 
+                    }, { status: 400 });
+                }
+                throw userError;
+            }
         }
 
         // Update or create doctor record
@@ -90,6 +109,7 @@ export async function PATCH(request: NextRequest) {
                         years_of_experience: doctor.years_of_experience,
                         consultation_fee: doctor.consultation_fee,
                         bio: doctor.bio,
+                        clinic_id: doctor.clinic_id, // Allow doctors to select/change their clinic
                         clinic_name: doctor.clinic_name,
                         address_line1: doctor.address_line1,
                         address_line2: doctor.address_line2,

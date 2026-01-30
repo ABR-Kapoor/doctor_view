@@ -47,6 +47,7 @@ export default function DoctorProfilePage() {
     years_of_experience: 0,
     consultation_fee: 500,
     bio: '',
+    clinic_id: null as string | null, // Selected clinic
     clinic_name: '',
     address_line1: '',
     address_line2: '',
@@ -59,6 +60,7 @@ export default function DoctorProfilePage() {
   const [uid, setUid] = useState('');
   const [profileImage, setProfileImage] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [clinics, setClinics] = useState<any[]>([]);
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -93,7 +95,20 @@ export default function DoctorProfilePage() {
 
   useEffect(() => {
     fetchProfile();
+    fetchClinics();
   }, []);
+
+  async function fetchClinics() {
+    try {
+      const response = await fetch('/api/clinics');
+      const data = await response.json();
+      if (data.success) {
+        setClinics(data.clinics || []);
+      }
+    } catch (error) {
+      console.error('Error fetching clinics:', error);
+    }
+  }
 
   async function fetchProfile() {
     try {
@@ -125,6 +140,7 @@ export default function DoctorProfilePage() {
           years_of_experience: data.doctor?.years_of_experience || 0,
           consultation_fee: data.doctor?.consultation_fee || 500,
           bio: data.doctor?.bio || '',
+          clinic_id: data.doctor?.clinic_id || null,
           clinic_name: data.doctor?.clinic_name || '',
           address_line1: data.doctor?.address_line1 || '',
           address_line2: data.doctor?.address_line2 || '',
@@ -164,12 +180,12 @@ export default function DoctorProfilePage() {
             years_of_experience: formData.years_of_experience,
             consultation_fee: formData.consultation_fee,
             bio: formData.bio,
+            clinic_id: formData.clinic_id,
             clinic_name: formData.clinic_name,
             address_line1: formData.address_line1,
             address_line2: formData.address_line2,
             city: formData.city,
-            state: formData.state,
-            postal_code: formData.postal_code,
+            state: formData.postal_code,
             languages: formData.languages,
           },
         }),
@@ -467,9 +483,60 @@ export default function DoctorProfilePage() {
           </div>
         </div>
 
+        {/* Clinic Affiliation */}
+        <div className="glass-card p-6 rounded-2xl">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Clinic Affiliation</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Clinic (Optional)
+              </label>
+              <select
+                value={formData.clinic_id || ''}
+                onChange={(e) => {
+                  const selectedClinicId = e.target.value || null;
+                  const selectedClinic = clinics.find(c => c.clinic_id === selectedClinicId);
+                  setFormData({ 
+                    ...formData, 
+                    clinic_id: selectedClinicId,
+                    clinic_name: selectedClinic?.clinic_name || ''
+                  });
+                }}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
+              >
+                <option value="">No Clinic (Independent Doctor)</option>
+                {clinics.map((clinic) => (
+                  <option key={clinic.clinic_id} value={clinic.clinic_id}>
+                    {clinic.clinic_name} - {clinic.city}, {clinic.state}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-2">
+                Select a clinic if you're affiliated with one. You can change this anytime.
+              </p>
+            </div>
+
+            {formData.clinic_id && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-sm text-green-700">
+                  ✓ You are affiliated with <strong>{formData.clinic_name}</strong>
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Clinic Details */}
         <div className="glass-card p-6 rounded-2xl">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Clinic Details</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Practice Location</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            {formData.clinic_id ? (
+              "Optional: Add additional practice location details (if different from affiliated clinic)"
+            ) : (
+              "Add your practice location details"
+            )}
+          </p>
           
           <div className="grid gap-4">
             <div>

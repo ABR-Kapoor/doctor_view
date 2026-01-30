@@ -1,6 +1,9 @@
+'use client';
+
 import Link from 'next/link';
 import { LoginLink, RegisterLink } from '@kinde-oss/kinde-auth-nextjs/components';
 import { Activity, Stethoscope, Users, BarChart3, FileText, Shield } from 'lucide-react';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
 
 export default function HomePage() {
   return (
@@ -14,7 +17,10 @@ export default function HomePage() {
               <span className="text-2xl font-bold gradient-text">AuraSutra</span>
               <span className="text-sm text-gray-600 ml-2">Doctor Portal</span>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
+              {/* Language Switcher */}
+              <LanguageSwitcher />
+              
               <LoginLink className="px-6 py-2 text-gray-700 hover:text-primary-600 smooth-transition">
                 Sign In
               </LoginLink>

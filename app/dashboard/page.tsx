@@ -14,6 +14,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { TranslatedText } from '../components/TranslatedText';
 
 interface DashboardStats {
   totalPatients: number;
@@ -106,9 +107,9 @@ export default function DoctorDashboard() {
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              {greeting}, Dr. {userName}! 👋
+              <TranslatedText as="span">{greeting}</TranslatedText>, <TranslatedText>Dr.</TranslatedText> <TranslatedText>{userName}</TranslatedText>! 👋
             </h1>
-            <p className="text-gray-600 mt-1">Here's what's happening with your practice today</p>
+            <p className="text-gray-600 mt-1"><TranslatedText>Here's what's happening with your practice today</TranslatedText></p>
           </div>
         </div>
       </div>
@@ -126,13 +127,13 @@ export default function DoctorDashboard() {
               </div>
               <div>
                 <h3 className="font-bold text-amber-900 text-lg">
-                  {stats.pendingRequests} Pending Appointment{stats.pendingRequests !== 1 ? 's' : ''}
+                  {stats.pendingRequests} <TranslatedText>{`Pending Appointment${stats.pendingRequests !== 1 ? 's' : ''}`}</TranslatedText>
                 </h3>
-                <p className="text-sm text-amber-700">Click to review and confirm requests</p>
+                <p className="text-sm text-amber-700"><TranslatedText>Click to review and confirm requests</TranslatedText></p>
               </div>
             </div>
             <div className="px-4 py-2 bg-amber-500 text-white rounded-lg font-semibold hover:bg-amber-600 smooth-transition">
-              Review Now →
+              <TranslatedText as="span">Review Now</TranslatedText> →
             </div>
           </div>
         </Link>
@@ -147,7 +148,7 @@ export default function DoctorDashboard() {
             </div>
             <TrendingUp className="w-5 h-5 text-green-500" />
           </div>
-          <h3 className="text-sm font-medium text-gray-600 mb-1">Total Patients</h3>
+          <h3 className="text-sm font-medium text-gray-600 mb-1"><TranslatedText>Total Patients</TranslatedText></h3>
           <p className="text-3xl font-bold text-gray-900">{stats.totalPatients}</p>
         </div>
 
@@ -158,13 +159,13 @@ export default function DoctorDashboard() {
             </div>
             <Clock className="w-5 h-5 text-blue-500" />
           </div>
-          <h3 className="text-sm font-medium text-gray-600 mb-1">Today's Appointments</h3>
+          <h3 className="text-sm font-medium text-gray-600 mb-1"><TranslatedText>Today's Appointments</TranslatedText></h3>
           <p className="text-3xl font-bold text-gray-900">{stats.todayAppointments}</p>
           <Link
             href="/dashboard/appointments"
             className="text-xs text-secondary-600 hover:underline mt-2 block"
           >
-            View schedule →
+            <TranslatedText as="span">View schedule</TranslatedText> →
           </Link>
         </div>
 
@@ -175,18 +176,18 @@ export default function DoctorDashboard() {
             </div>
             {stats.pendingApprovals > 0 && (
               <span className="text-xs bg-accent-100 text-accent-700 px-2 py-1 rounded-full">
-                Action Required
+                <TranslatedText>Action Required</TranslatedText>
               </span>
             )}
           </div>
-          <h3 className="text-sm font-medium text-gray-600 mb-1">Pending Approvals</h3>
+          <h3 className="text-sm font-medium text-gray-600 mb-1"><TranslatedText>Pending Approvals</TranslatedText></h3>
           <p className="text-3xl font-bold text-gray-900">{stats.pendingApprovals}</p>
           {stats.pendingApprovals > 0 && (
             <Link
               href="/dashboard/appointments"
               className="text-xs text-accent-600 hover:underline mt-2 block"
             >
-              Review now →
+              <TranslatedText as="span">Review now</TranslatedText> →
             </Link>
           )}
         </div>
@@ -198,7 +199,7 @@ export default function DoctorDashboard() {
             </div>
             <TrendingUp className="w-5 h-5 text-green-500" />
           </div>
-          <h3 className="text-sm font-medium text-gray-600 mb-1">Monthly Revenue</h3>
+          <h3 className="text-sm font-medium text-gray-600 mb-1"><TranslatedText>Monthly Revenue</TranslatedText></h3>
           <p className="text-3xl font-bold text-gray-900">
             ₹{(stats.monthlyRevenue / 1000).toFixed(1)}K
           </p>
@@ -212,7 +213,7 @@ export default function DoctorDashboard() {
           <div className="glass-card p-6 rounded-2xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-gray-900">
-                Appointments Overview
+                <TranslatedText>Appointments Overview</TranslatedText>
               </h2>
               <Calendar className="w-5 h-5 text-gray-400" />
             </div>
@@ -239,7 +240,7 @@ export default function DoctorDashboard() {
             <div className="glass-card p-6 rounded-2xl">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-gray-900">
-                  Patient Growth
+                  <TranslatedText>Patient Growth</TranslatedText>
                 </h2>
                 <Users className="w-5 h-5 text-gray-400" />
               </div>

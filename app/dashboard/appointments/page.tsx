@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Calendar, Video, MapPin, Check, X, Clock, User, CheckCircle, ChevronDown, Phone, Mail, MoreVertical } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { TranslatedText } from '../../components/TranslatedText';
 
 interface Appointment {
   aid: string;
@@ -250,8 +251,8 @@ export default function DoctorAppointmentsPage() {
     <div className="space-y-6">
       {/* Compact Header */}
       <div className="mb-4">
-        <h1 className="text-3xl font-black text-gray-900 mb-1">Consultation Schedule</h1>
-        <p className="text-gray-600 text-sm">Manage your appointments and patient consultations</p>
+        <h1 className="text-3xl font-black text-gray-900 mb-1"><TranslatedText>Consultation Schedule</TranslatedText></h1>
+        <p className="text-gray-600 text-sm"><TranslatedText>Manage your appointments and patient consultations</TranslatedText></p>
       </div>
 
       {/* Tabs */}
@@ -266,7 +267,7 @@ export default function DoctorAppointmentsPage() {
                 : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
-            {tab.label}
+            <TranslatedText>{tab.label}</TranslatedText>
             {tab.count > 0 && (
               <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-black ${
                 activeTab === tab.id ? 'bg-white/20' : 'bg-primary-100 text-primary-600'
@@ -282,7 +283,7 @@ export default function DoctorAppointmentsPage() {
       {currentAppointments.length === 0 ? (
         <div className="glass-card p-12 rounded-2xl text-center">
           <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500">No appointments in this category</p>
+          <p className="text-gray-500"><TranslatedText>No appointments in this category</TranslatedText></p>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -337,13 +338,13 @@ export default function DoctorAppointmentsPage() {
                     
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-semibold text-gray-900 truncate">
-                        {apt.patient?.user?.name || 'Patient'}
+                        <TranslatedText>{apt.patient?.user?.name || 'Patient'}</TranslatedText>
                       </h3>
                       <div className="flex items-center space-x-2 mt-1">
                         <div className={`p-1.5 rounded-lg ${apt.mode === 'online' ? 'bg-blue-100' : 'bg-emerald-100'}`}>
                           {apt.mode === 'online' ? <Video className="w-3 h-3 text-blue-600" /> : <MapPin className="w-3 h-3 text-emerald-600" />}
                         </div>
-                        <span className="text-xs font-bold text-gray-500 capitalize">{apt.mode}</span>
+                        <span className="text-xs font-bold text-gray-500 capitalize"><TranslatedText>{apt.mode}</TranslatedText></span>
                       </div>
                       {apt.patient?.user?.phone && (
                         <div className="flex items-center space-x-1 mt-1 text-xs text-gray-500">
@@ -360,7 +361,7 @@ export default function DoctorAppointmentsPage() {
                     apt.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
                     'bg-amber-50 text-amber-700 border-amber-200'
                   }`}>
-                    {apt.status}
+                    <TranslatedText>{apt.status}</TranslatedText>
                   </span>
                 </div>
                 
@@ -369,7 +370,7 @@ export default function DoctorAppointmentsPage() {
                   <div className="flex items-center space-x-2 text-sm">
                     <Calendar className="w-4 h-4 text-gray-400" />
                     <span className="font-medium text-gray-700">
-                      {new Date(apt.scheduled_date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                      <TranslatedText>{new Date(apt.scheduled_date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</TranslatedText>
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-sm">
@@ -381,8 +382,8 @@ export default function DoctorAppointmentsPage() {
                 {/* Complaint Description */}
                 {apt.complaint_description && (
                   <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                    <p className="text-xs font-bold text-gray-400 mb-1">Patient's Complaint</p>
-                    <p className="text-sm text-gray-700 line-clamp-2">{apt.complaint_description}</p>
+                    <p className="text-xs font-bold text-gray-400 mb-1"><TranslatedText>Patient's Complaint</TranslatedText></p>
+                    <p className="text-sm text-gray-700 line-clamp-2"><TranslatedText>{apt.complaint_description}</TranslatedText></p>
                   </div>
                 )}
                 
@@ -395,13 +396,13 @@ export default function DoctorAppointmentsPage() {
                         className="flex-1 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold text-sm hover:shadow-lg transition-all flex items-center justify-center space-x-1"
                       >
                         <Check className="w-4 h-4" />
-                        <span>Confirm</span>
+                        <span><TranslatedText>Confirm</TranslatedText></span>
                       </button>
                       <button
                         onClick={() => updateAppointmentStatus(apt.aid, 'cancelled')}
                         className="px-4 py-2.5 bg-red-50 text-red-600 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors"
                       >
-                        Decline
+                        <TranslatedText>Decline</TranslatedText>
                       </button>
                     </>
                   )}
@@ -418,7 +419,7 @@ export default function DoctorAppointmentsPage() {
                       className="flex-1 py-2.5 bg-gradient-to-r from-primary-600 to-emerald-600 text-white rounded-xl font-bold text-sm hover:shadow-lg transition-all flex items-center justify-center space-x-1"
                     >
                       {apt.mode === 'online' ? <Video className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
-                      <span>{apt.mode === 'online' ? 'Start Call' : 'Complete Visit'}</span>
+                      <span><TranslatedText>{apt.mode === 'online' ? 'Start Call' : 'Complete Visit'}</TranslatedText></span>
                     </button>
                   )}
                   
@@ -444,7 +445,7 @@ export default function DoctorAppointmentsPage() {
                             }}
                             className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                           >
-                            View Patient History
+                            <TranslatedText>View Patient History</TranslatedText>
                           </button>
                           {apt.status !== 'completed' && (
                             <button
@@ -454,7 +455,7 @@ export default function DoctorAppointmentsPage() {
                               }}
                               className="w-full px-4 py-2 text-left text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
                             >
-                              Mark as Completed
+                              <TranslatedText>Mark as Completed</TranslatedText>
                             </button>
                           )}
                           {apt.status !== 'cancelled' && (
@@ -465,7 +466,7 @@ export default function DoctorAppointmentsPage() {
                               }}
                               className="w-full px-4 py-2 text-left text-sm font-medium text-amber-600 hover:bg-amber-50 transition-colors"
                             >
-                              Cancel Appointment
+                              <TranslatedText>Cancel Appointment</TranslatedText>
                             </button>
                           )}
                           <button
@@ -475,7 +476,7 @@ export default function DoctorAppointmentsPage() {
                             }}
                             className="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100"
                           >
-                            Delete Record
+                            <TranslatedText>Delete Record</TranslatedText>
                           </button>
                         </div>
                       </div>

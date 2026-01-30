@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Pill, Plus, X, ArrowLeft, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { TranslatedText } from '../../../../components/TranslatedText';
 
 interface Medicine {
   name: string;
@@ -147,9 +148,15 @@ export default function EditPrescriptionPage() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Prescription</h1>
+          <h1 className="text-3xl font-bold text-gray-900"><TranslatedText>Edit Prescription</TranslatedText></h1>
           <p className="text-gray-600">
-            {patientName ? `For ${patientName}` : 'Update prescription details'}
+            {patientName ? (
+                <>
+                    <TranslatedText>For</TranslatedText> <TranslatedText>{patientName}</TranslatedText>
+                </>
+            ) : (
+                <TranslatedText>Update prescription details</TranslatedText>
+            )}
           </p>
         </div>
       </div>
@@ -157,11 +164,11 @@ export default function EditPrescriptionPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Diagnosis */}
         <div className="glass-card p-6 rounded-2xl">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Diagnosis & Symptoms</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4"><TranslatedText>Diagnosis & Symptoms</TranslatedText></h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Diagnosis *
+                <TranslatedText>Diagnosis</TranslatedText> *
               </label>
               <input
                 type="text"
@@ -174,7 +181,7 @@ export default function EditPrescriptionPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Symptoms (comma separated)
+                <TranslatedText>Symptoms (comma separated)</TranslatedText>
               </label>
               <input
                 type="text"
@@ -192,7 +199,7 @@ export default function EditPrescriptionPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-gray-900 flex items-center space-x-2">
               <Pill className="w-5 h-5 text-primary-600" />
-              <span>Medicines</span>
+              <span><TranslatedText>Medicines</TranslatedText></span>
             </h2>
             <button
               type="button"
@@ -200,7 +207,7 @@ export default function EditPrescriptionPage() {
               className="px-4 py-2 bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors flex items-center space-x-2"
             >
               <Plus className="w-4 h-4" />
-              <span>Add Medicine</span>
+              <span><TranslatedText>Add Medicine</TranslatedText></span>
             </button>
           </div>
 
@@ -219,7 +226,7 @@ export default function EditPrescriptionPage() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Medicine Name *
+                      <TranslatedText>Medicine Name</TranslatedText> *
                     </label>
                     <input
                       type="text"
@@ -232,7 +239,7 @@ export default function EditPrescriptionPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Dosage *
+                      <TranslatedText>Dosage</TranslatedText> *
                     </label>
                     <input
                       type="text"
@@ -245,7 +252,7 @@ export default function EditPrescriptionPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Frequency *
+                      <TranslatedText>Frequency</TranslatedText> *
                     </label>
                     <input
                       type="text"
@@ -258,7 +265,7 @@ export default function EditPrescriptionPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Duration *
+                      <TranslatedText>Duration</TranslatedText> *
                     </label>
                     <input
                       type="text"
@@ -277,11 +284,11 @@ export default function EditPrescriptionPage() {
 
         {/* Instructions & Diet */}
         <div className="glass-card p-6 rounded-2xl">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Additional Instructions</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4"><TranslatedText>Additional Instructions</TranslatedText></h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Instructions
+                <TranslatedText>Instructions</TranslatedText>
               </label>
               <textarea
                 value={instructions}
@@ -293,7 +300,7 @@ export default function EditPrescriptionPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Diet Advice
+                <TranslatedText>Diet Advice</TranslatedText>
               </label>
               <textarea
                 value={dietAdvice}
@@ -305,7 +312,7 @@ export default function EditPrescriptionPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Follow-up Date
+                <TranslatedText>Follow-up Date</TranslatedText>
               </label>
               <input
                 type="date"
@@ -325,14 +332,14 @@ export default function EditPrescriptionPage() {
             className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-semibold hover:shadow-lg smooth-transition disabled:opacity-50 flex items-center justify-center space-x-2"
           >
             <Save className="w-5 h-5" />
-            <span>{saving ? 'Saving...' : 'Save Changes'}</span>
+            <span><TranslatedText>{saving ? 'Saving...' : 'Save Changes'}</TranslatedText></span>
           </button>
           <button
             type="button"
             onClick={() => router.push('/dashboard/prescriptions')}
             className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 smooth-transition"
           >
-            Cancel
+            <TranslatedText>Cancel</TranslatedText>
           </button>
         </div>
       </form>

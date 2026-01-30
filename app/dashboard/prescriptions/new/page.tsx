@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Pill, Plus, X, ArrowLeft, Sparkles, Loader2, User, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { TranslatedText } from '../../../components/TranslatedText';
 
 interface Medicine {
   name: string;
@@ -202,9 +203,15 @@ export default function NewPrescriptionPage() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">New Prescription</h1>
+          <h1 className="text-3xl font-bold text-gray-900"><TranslatedText>New Prescription</TranslatedText></h1>
           <p className="text-gray-600">
-            {patientName ? `For ${patientName}` : 'Create prescription for patient'}
+            {patientName ? (
+                <>
+                    <TranslatedText>For</TranslatedText> <TranslatedText>{patientName}</TranslatedText>
+                </>
+            ) : (
+                <TranslatedText>Create prescription for patient</TranslatedText>
+            )}
           </p>
         </div>
       </div>
@@ -235,10 +242,10 @@ export default function NewPrescriptionPage() {
             <div className="text-white space-y-3">
               <h3 className="text-2xl font-bold flex items-center justify-center space-x-2">
                 <Sparkles className="w-6 h-6 animate-pulse" />
-                <span>Dr. Manas AI is analyzing...</span>
+                <span><TranslatedText>Dr. Manas AI is analyzing...</TranslatedText></span>
               </h3>
               <p className="text-purple-200 animate-pulse">
-                Reviewing patient history, symptoms, and creating personalized prescription
+                <TranslatedText>Reviewing patient history, symptoms, and creating personalized prescription</TranslatedText>
               </p>
             </div>
           </div>
@@ -250,7 +257,7 @@ export default function NewPrescriptionPage() {
         <div className="glass-card p-6 rounded-2xl">
           <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
             <User className="w-5 h-5 text-primary-600" />
-            <span>Select Patient</span>
+            <span><TranslatedText>Select Patient</TranslatedText></span>
           </h2>
           
           <div className="space-y-4">
@@ -297,7 +304,7 @@ export default function NewPrescriptionPage() {
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="font-bold text-gray-900">{patient.user?.name}</p>
+                        <p className="font-bold text-gray-900"><TranslatedText>{patient.user?.name}</TranslatedText></p>
                         <p className="text-sm text-gray-500">{patient.user?.email}</p>
                       </div>
                       {selectedPatientId === patient.pid && (
@@ -311,7 +318,7 @@ export default function NewPrescriptionPage() {
                   </button>
                 ))}
               {patients.filter(p => p.user?.name?.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
-                <p className="text-center text-gray-500 py-8">No patients found</p>
+                <p className="text-center text-gray-500 py-8"><TranslatedText>No patients found</TranslatedText></p>
               )}
             </div>
           </div>
@@ -326,18 +333,18 @@ export default function NewPrescriptionPage() {
         className="w-full p-6 glass-card rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold text-lg smooth-transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
       >
         <Sparkles className="w-6 h-6" />
-        <span>Generate with Dr. Manas AI</span>
-        {!selectedPatientId && <span className="text-sm font-normal">(Select a patient first)</span>}
+        <span><TranslatedText>Generate with Dr. Manas AI</TranslatedText></span>
+        {!selectedPatientId && <span className="text-sm font-normal"><TranslatedText>(Select a patient first)</TranslatedText></span>}
       </button>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Diagnosis */}
         <div className="glass-card p-6 rounded-2xl">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Diagnosis & Symptoms</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4"><TranslatedText>Diagnosis & Symptoms</TranslatedText></h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Diagnosis *
+                <TranslatedText>Diagnosis</TranslatedText> *
               </label>
               <input
                 type="text"
@@ -350,7 +357,7 @@ export default function NewPrescriptionPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Symptoms (comma separated)
+                <TranslatedText>Symptoms (comma separated)</TranslatedText>
               </label>
               <input
                 type="text"
@@ -368,7 +375,7 @@ export default function NewPrescriptionPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-gray-900 flex items-center space-x-2">
               <Pill className="w-5 h-5 text-primary-600" />
-              <span>Medicines</span>
+              <span><TranslatedText>Medicines</TranslatedText></span>
             </h2>
             <button
               type="button"
@@ -376,7 +383,7 @@ export default function NewPrescriptionPage() {
               className="px-4 py-2 bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors flex items-center space-x-2"
             >
               <Plus className="w-4 h-4" />
-              <span>Add Medicine</span>
+              <span><TranslatedText>Add Medicine</TranslatedText></span>
             </button>
           </div>
 
@@ -395,7 +402,7 @@ export default function NewPrescriptionPage() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Medicine Name *
+                      <TranslatedText>Medicine Name</TranslatedText> *
                     </label>
                     <input
                       type="text"
@@ -408,7 +415,7 @@ export default function NewPrescriptionPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Dosage *
+                      <TranslatedText>Dosage</TranslatedText> *
                     </label>
                     <input
                       type="text"
@@ -421,7 +428,7 @@ export default function NewPrescriptionPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Frequency *
+                      <TranslatedText>Frequency</TranslatedText> *
                     </label>
                     <input
                       type="text"
@@ -434,7 +441,7 @@ export default function NewPrescriptionPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Duration *
+                      <TranslatedText>Duration</TranslatedText> *
                     </label>
                     <input
                       type="text"
@@ -453,11 +460,11 @@ export default function NewPrescriptionPage() {
 
         {/* Instructions & Diet */}
         <div className="glass-card p-6 rounded-2xl">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Additional Instructions</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4"><TranslatedText>Additional Instructions</TranslatedText></h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Instructions
+                <TranslatedText>Instructions</TranslatedText>
               </label>
               <textarea
                 value={instructions}
@@ -469,7 +476,7 @@ export default function NewPrescriptionPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Diet Advice
+                <TranslatedText>Diet Advice</TranslatedText>
               </label>
               <textarea
                 value={dietAdvice}
@@ -481,7 +488,7 @@ export default function NewPrescriptionPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Follow-up Date
+                <TranslatedText>Follow-up Date</TranslatedText>
               </label>
               <input
                 type="date"
@@ -500,14 +507,14 @@ export default function NewPrescriptionPage() {
             disabled={loading}
             className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-semibold hover:shadow-lg smooth-transition disabled:opacity-50"
           >
-            {loading ? 'Creating...' : 'Create Prescription'}
+            <TranslatedText>{loading ? 'Creating...' : 'Create Prescription'}</TranslatedText>
           </button>
           <button
             type="button"
             onClick={() => router.back()}
             className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 smooth-transition"
           >
-            Cancel
+            <TranslatedText>Cancel</TranslatedText>
           </button>
         </div>
       </form>

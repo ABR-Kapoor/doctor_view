@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Video } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { TranslatedText } from '../../../components/TranslatedText';
 
 export default function DoctorVideoCallPage() {
   const params = useParams();
@@ -271,8 +272,8 @@ export default function DoctorVideoCallPage() {
       {loading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 z-50">
           <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-gray-700 font-medium">Connecting to video call...</p>
-          <p className="text-gray-500 text-sm mt-2">Please allow camera and microphone access</p>
+          <p className="text-gray-700 font-medium"><TranslatedText>Connecting to video call...</TranslatedText></p>
+          <p className="text-gray-500 text-sm mt-2"><TranslatedText>Please allow camera and microphone access</TranslatedText></p>
         </div>
       )}
 
@@ -283,13 +284,13 @@ export default function DoctorVideoCallPage() {
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Video className="w-8 h-8 text-red-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Connection Failed</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2"><TranslatedText>Connection Failed</TranslatedText></h2>
             <p className="text-gray-600 mb-4">{error}</p>
             <button
               onClick={() => router.push('/dashboard/appointments')}
               className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
             >
-              Back to Appointments
+              <TranslatedText>Back to Appointments</TranslatedText>
             </button>
           </div>
         </div>
@@ -304,10 +305,10 @@ export default function DoctorVideoCallPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900">
-                {appointmentData.patient?.user?.name || 'Patient'}
+                <TranslatedText>{appointmentData.patient?.user?.name || 'Patient'}</TranslatedText>
               </p>
               <p className="text-xs text-gray-600">
-                {new Date(appointmentData.scheduled_date).toLocaleDateString()} at{' '}
+                {new Date(appointmentData.scheduled_date).toLocaleDateString()} <TranslatedText>at</TranslatedText>{' '}
                 {appointmentData.scheduled_time}
               </p>
             </div>
@@ -319,7 +320,7 @@ export default function DoctorVideoCallPage() {
       {callStartTime && !showPostCallModal && (
         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg z-10">
           <p className="text-sm font-bold text-gray-900">
-            Duration: {Math.floor(callDurationSeconds / 60)}:{String(callDurationSeconds % 60).padStart(2, '0')}
+            <TranslatedText>Duration</TranslatedText>: {Math.floor(callDurationSeconds / 60)}:{String(callDurationSeconds % 60).padStart(2, '0')}
           </p>
         </div>
       )}
@@ -333,10 +334,10 @@ export default function DoctorVideoCallPage() {
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
                 <Video className="w-10 h-10 text-green-600" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">Call Ended Successfully</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-3"><TranslatedText>Call Ended Successfully</TranslatedText></h2>
               <p className="text-lg text-gray-600">
-                Duration: <span className="font-bold text-primary-600">
-                  {Math.floor(callDurationSeconds / 60)} min {callDurationSeconds % 60} sec
+                <TranslatedText>Duration</TranslatedText>: <span className="font-bold text-primary-600">
+                  {Math.floor(callDurationSeconds / 60)} <TranslatedText>min</TranslatedText> {callDurationSeconds % 60} <TranslatedText>sec</TranslatedText>
                 </span>
               </p>
             </div>
@@ -351,13 +352,13 @@ export default function DoctorVideoCallPage() {
                     </span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm text-gray-600">Patient</p>
-                    <p className="font-bold text-gray-900 text-lg">{appointmentData.patient?.user?.name}</p>
+                    <p className="text-sm text-gray-600"><TranslatedText>Patient</TranslatedText></p>
+                    <p className="font-bold text-gray-900 text-lg"><TranslatedText>{appointmentData.patient?.user?.name}</TranslatedText></p>
                   </div>
                 </div>
                 <div className="border-t border-gray-200 pt-4">
-                  <p className="text-sm text-gray-600 mb-1">Chief Complaint</p>
-                  <p className="text-gray-900">{appointmentData.chief_complaint}</p>
+                  <p className="text-sm text-gray-600 mb-1"><TranslatedText>Chief Complaint</TranslatedText></p>
+                  <p className="text-gray-900"><TranslatedText>{appointmentData.chief_complaint || 'N/A'}</TranslatedText></p>
                 </div>
               </div>
             )}
@@ -368,13 +369,13 @@ export default function DoctorVideoCallPage() {
                 onClick={handlePrescribe}
                 className="w-full px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-bold text-lg hover:shadow-xl smooth-transition transform hover:scale-105"
               >
-                📝 Prescribe Medicine
+                📝 <TranslatedText>Prescribe Medicine</TranslatedText>
               </button>
               <button
                 onClick={() => router.push('/dashboard/appointments')}
                 className="w-full px-8 py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-300 smooth-transition"
               >
-                ← Back to Dashboard
+                ← <TranslatedText>Back to Dashboard</TranslatedText>
               </button>
             </div>
           </div>
@@ -383,4 +384,3 @@ export default function DoctorVideoCallPage() {
     </div>
   );
 }
-
