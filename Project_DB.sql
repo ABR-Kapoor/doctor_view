@@ -545,6 +545,8 @@ create table public.appointments (
   call_started_at timestamp with time zone null,
   call_ended_at timestamp with time zone null,
   call_duration_minutes integer null,
+  payment_id text null,
+  payment_status text null default 'pending'::text,
   constraint appointments_pkey primary key (aid),
   constraint appointment_mode_check check (
     (
@@ -624,6 +626,10 @@ create index IF not exists idx_appointments_date on public.appointments using bt
 create index IF not exists idx_appointments_status on public.appointments using btree (status) TABLESPACE pg_default;
 
 create index IF not exists idx_appointments_mode on public.appointments using btree (mode) TABLESPACE pg_default;
+
+create index IF not exists idx_appointments_payment_status on public.appointments using btree (payment_status) TABLESPACE pg_default;
+
+create index IF not exists idx_appointments_payment_id on public.appointments using btree (payment_id) TABLESPACE pg_default;
 
 create index IF not exists idx_appointments_did_date_status on public.appointments using btree (did, scheduled_date, status) TABLESPACE pg_default;
 

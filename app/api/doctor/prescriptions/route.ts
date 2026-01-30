@@ -63,6 +63,27 @@ export async function POST(request: NextRequest) {
 
         console.log('[API] Prescription created:', data.prescription_id);
 
+        // Send notifications to patient and doctor
+        try {
+            await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/api/notifications/send`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'prescription_created',
+                    data: {
+                        patientId: pid,
+                        doctorId: did,
+                        diagnosis,
+                        medicines,
+                        instructions,
+                    }
+                })
+            });
+        } catch (notifError) {
+            console.error('Failed to send notification:', notifError);
+            // Don't fail the prescription creation if notification fails
+        }
+
         return NextResponse.json({
             success: true,
             prescription: data,

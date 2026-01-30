@@ -4,6 +4,7 @@ import { Home, Calendar, Users, FileText, User, LogOut, Pill } from 'lucide-reac
 import Link from 'next/link';
 
 import ProfilePicture from '../components/ProfilePicture';
+import { supabase } from '@/lib/shared/supabase';
 
 export default async function DoctorDashboardLayout({
   children,
@@ -17,6 +18,20 @@ export default async function DoctorDashboardLayout({
   }
 
   const user = await getUser();
+
+  // Check user role from database
+  if (user?.id) {
+    const { data: userData, error } = await supabase
+      .from('users')
+      .select('role')
+      .eq('auth_id', user.id)
+      .single();
+
+    // If user is a patient, redirect to unauthorized page
+    if (userData?.role === 'patient') {
+      redirect('/unauthorized');
+    }
+  }
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
