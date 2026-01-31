@@ -4,13 +4,10 @@ import { Home, Calendar, Users, FileText, User, LogOut, Pill } from 'lucide-reac
 import Link from 'next/link';
 
 import ProfilePicture from '../components/ProfilePicture';
-<<<<<<< HEAD
 import { supabase } from '@/lib/shared/supabase';
-=======
 import AuthSync from '../../components/AuthSync';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { TranslatedText } from '../components/TranslatedText';
->>>>>>> e831444 (add: razorpay payment integration, multilingual | add clinic)
 
 export default async function DoctorDashboardLayout({
   children,
