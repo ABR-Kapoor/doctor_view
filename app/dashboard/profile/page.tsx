@@ -45,7 +45,7 @@ export default function DoctorProfilePage() {
     qualification: '',
     registration_number: '',
     years_of_experience: 0,
-    consultation_fee: 500,
+    consultation_fee: 0,
     bio: '',
     clinic_id: null as string | null, // Selected clinic
     clinic_name: '',
@@ -133,12 +133,12 @@ export default function DoctorProfilePage() {
           name: data.user?.name || '',
           phone: data.user?.phone || '',
           email: data.user?.email || '',
-          specialization: data.doctor?.specialization || ['General Ayurveda'],
+          specialization: data.doctor?.specialization || [],
           custom_specializations: data.doctor?.custom_specializations || '',
           qualification: data.doctor?.qualification || '',
           registration_number: data.doctor?.registration_number || '',
           years_of_experience: data.doctor?.years_of_experience || 0,
-          consultation_fee: data.doctor?.consultation_fee || 500,
+          consultation_fee: data.doctor?.consultation_fee || 0,
           bio: data.doctor?.bio || '',
           clinic_id: data.doctor?.clinic_id || null,
           clinic_name: data.doctor?.clinic_name || '',
@@ -147,7 +147,7 @@ export default function DoctorProfilePage() {
           city: data.doctor?.city || '',
           state: data.doctor?.state || '',
           postal_code: data.doctor?.postal_code || '',
-          languages: data.doctor?.languages || ['English', 'Hindi'],
+          languages: data.doctor?.languages || [],
         });
       }
     } catch (error) {
