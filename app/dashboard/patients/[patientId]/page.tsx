@@ -35,7 +35,7 @@ export default function PatientDetailPage() {
   const params = useParams();
   const router = useRouter();
   const pid = params.patientId as string;
-  
+
   const [loading, setLoading] = useState(true);
   const [patient, setPatient] = useState<PatientData | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -118,7 +118,7 @@ export default function PatientDetailPage() {
         </div>
         <button
           onClick={() => router.push(`/dashboard/prescriptions/new?pid=${pid}`)}
-          className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-semibold hover:shadow-lg smooth-transition"
+          className="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg smooth-transition"
         >
           📝 New Prescription
         </button>
@@ -138,7 +138,7 @@ export default function PatientDetailPage() {
               <User className="w-12 h-12 text-primary-600" />
             )}
           </div>
-          
+
           <div className="flex-1 grid md:grid-cols-2 gap-4 text-sm">
             <div className="flex items-center space-x-2 text-gray-600">
               <Mail className="w-4 h-4" />
@@ -258,13 +258,12 @@ export default function PatientDetailPage() {
                     </span>
                   )}
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      apt.status === 'completed'
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${apt.status === 'completed'
                         ? 'bg-blue-100 text-blue-700'
                         : apt.status === 'confirmed'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-200 text-gray-700'
-                    }`}
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-gray-200 text-gray-700'
+                      }`}
                   >
                     {apt.status}
                   </span>

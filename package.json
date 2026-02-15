@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",
-        "@kinde-oss/kinde-auth-nextjs": "^2.1.0",
+        "@kinde-oss/kinde-auth-nextjs": "^2.11.0",
         "@radix-ui/react-alert-dialog": "^1.0.5",
         "@radix-ui/react-avatar": "^1.0.4",
         "@radix-ui/react-dialog": "^1.0.5",

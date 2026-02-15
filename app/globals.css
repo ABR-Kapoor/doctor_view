@@ -6,48 +6,60 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 142.1 76.2% 36.3%;        /* Green */
+    /* Base Colors - Soft Mint/Teal/Green Theme */
+    --background: 153 60% 97%;
+    /* Very nice minty-white background */
+    --foreground: 215 28% 17%;
+    /* Dark gunmetal for text */
+
+    /* Primary - The main brand green/teal */
+    --primary: 165 58% 35%;
+    /* #268C6F (Teal Green) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;          /* Light Blue-Gray */
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;             /* Light Blue-Gray */
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;         /* Red */
+
+    /* Secondary - Lighter accents */
+    --secondary: 165 40% 90%;
+    --secondary-foreground: 165 58% 25%;
+
+    /* Accent - For cards and highlights */
+    --accent: 165 30% 96%;
+    --accent-foreground: 165 58% 25%;
+
+    /* Card - Glass effect variables */
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 17%;
+
+    /* Semantic Colors */
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142.1 76.2% 36.3%;            /* Green */
-    --radius: 1rem;
+
+    --border: 165 30% 90%;
+    --input: 165 30% 90%;
+    --ring: 165 58% 35%;
+
+    --radius: 1.5rem;
+    /* More rounded corners per reference */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 142.1 76.2% 36.3%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Dark mode implementation if needed, aligning to teal theme */
+    --background: 165 40% 10%;
+    --foreground: 165 20% 90%;
+    --card: 165 40% 12%;
+    --card-foreground: 165 20% 90%;
+    --primary: 165 58% 45%;
+    --primary-foreground: 165 40% 10%;
+    --secondary: 165 30% 20%;
+    --secondary-foreground: 165 20% 90%;
+    --muted: 165 30% 20%;
+    --muted-foreground: 165 20% 60%;
+    --accent: 165 30% 20%;
+    --accent-foreground: 165 20% 90%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 142.1 76.2% 36.3%;
+    --border: 165 30% 20%;
+    --input: 165 30% 20%;
+    --ring: 165 58% 45%;
   }
 }
 
@@ -55,47 +67,76 @@
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 text-foreground min-h-screen;
+    /* Soft cloudy gradient background */
+    background: radial-gradient(circle at 10% 20%, rgb(233, 252, 245) 0%, rgb(215, 248, 240) 40%, rgb(235, 250, 247) 90%);
+    @apply text-foreground min-h-screen text-base antialiased;
     font-family: 'Poppins', 'Noto Sans Devanagari', sans-serif;
   }
 }
 
 @layer components {
-  /* Glassmorphic Card */
-  .glass-card {
-    @apply bg-white/70 backdrop-blur-sm border border-white/20 shadow-sm transition-all duration-300;
+
+  /* Modern Glass Panel - Main Card Style */
+  .glass-panel {
+    @apply bg-white/40 backdrop-blur-xl border border-white/60 rounded-[2rem];
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   }
 
-  .glass-card-hover {
-    @apply glass-card hover:shadow-green-200/50 hover:shadow-xl hover:scale-[1.01] hover:-translate-y-1;
+  /* High contrast glass card for active states or emphasis */
+  .glass-card-solid {
+    @apply bg-white/80 backdrop-blur-md border border-white/50 shadow-sm rounded-3xl;
   }
 
-  /* Gradient Text */
-  .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-500 font-black;
+  /* Interactive Cards */
+  .hover-card {
+    @apply bg-white/50 backdrop-blur-md border border-white/40 shadow-sm transition-all duration-300 rounded-[2rem] hover:bg-white/70 hover:shadow-md hover:-translate-y-1;
   }
 
-  /* Main Button Style */
-  .btn-primary {
-    @apply bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-green-200 hover:from-green-600 hover:to-emerald-600 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all;
+  /* Specific green card from reference */
+  .green-gradient-card {
+    background: linear-gradient(135deg, rgba(82, 196, 172, 0.4) 0%, rgba(132, 218, 202, 0.2) 100%);
+    @apply backdrop-blur-md border border-white/30 text-emerald-900 shadow-sm rounded-[2rem];
   }
 
-  /* Smooth Transitions */
-  .smooth-transition {
-    @apply transition-all duration-300 ease-in-out;
+  /* Sidebar Specifics */
+  .sidebar-link {
+    @apply flex items-center space-x-4 px-6 py-3.5 rounded-2xl transition-all duration-200 text-gray-600 font-medium hover:bg-white/40;
   }
 
-  /* Focus Ring */
-  .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2;
+  .sidebar-link-active {
+    @apply bg-teal-800 text-white shadow-lg shadow-teal-900/10 font-medium;
   }
+
+  /* Dashboard Grid Layout Helpers */
+  .dashboard-grid {
+    @apply grid gap-6;
+    grid-template-columns: 1.2fr 0.8fr 0.8fr;
+    /* Adjust based on usage */
+  }
+
+  /* Custom Blue Theme Background */
+  .bg-blue-theme {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), url('/blue_theme.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    @apply text-black border-none;
+    /* ensure text is readable and border is removed for cleaner look */
+  }
+
+  /* Radial Gradient for Home Page */
+  .bg-gradient-radial {
+    background: radial-gradient(circle at center, var(--tw-gradient-stops));
+  }
+
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Minimal */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -103,44 +144,14 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-green-200 rounded-full hover:bg-green-300 transition-colors;
+  @apply bg-teal-100/50 rounded-full hover:bg-teal-200/50 transition-colors;
 }
 
-/* Animations */
-@keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
+/* Utilities for text */
+.text-label {
+  @apply text-sm text-gray-500 font-medium;
 }
 
-@keyframes levitate {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulse-primary {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-  50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-}
-
-.skeleton {
-  @apply animate-pulse bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100;
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite linear;
-}
-
-.levitating-card {
-  animation: levitate 4s ease-in-out infinite;
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.4s ease-out forwards;
-}
-
-.animate-pulse-primary {
-  animation: pulse-primary 2s infinite ease-in-out;
+.text-value {
+  @apply text-2xl font-bold text-gray-800;
 }

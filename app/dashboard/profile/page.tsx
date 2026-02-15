@@ -49,11 +49,6 @@ export default function DoctorProfilePage() {
     bio: '',
     clinic_id: null as string | null, // Selected clinic
     clinic_name: '',
-    address_line1: '',
-    address_line2: '',
-    city: '',
-    state: '',
-    postal_code: '',
     languages: [] as string[],
   });
 
@@ -102,11 +97,19 @@ export default function DoctorProfilePage() {
     try {
       const response = await fetch('/api/clinics');
       const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('Failed to fetch clinics:', data.error);
+        toast.error('Could not load clinics list. You can still enter clinic details manually.');
+        return;
+      }
+      
       if (data.success) {
         setClinics(data.clinics || []);
       }
     } catch (error) {
       console.error('Error fetching clinics:', error);
+      toast.error('Could not load clinics list. You can still enter clinic details manually.');
     }
   }
 
@@ -142,11 +145,6 @@ export default function DoctorProfilePage() {
           bio: data.doctor?.bio || '',
           clinic_id: data.doctor?.clinic_id || null,
           clinic_name: data.doctor?.clinic_name || '',
-          address_line1: data.doctor?.address_line1 || '',
-          address_line2: data.doctor?.address_line2 || '',
-          city: data.doctor?.city || '',
-          state: data.doctor?.state || '',
-          postal_code: data.doctor?.postal_code || '',
           languages: data.doctor?.languages || [],
         });
       }
@@ -182,10 +180,6 @@ export default function DoctorProfilePage() {
             bio: formData.bio,
             clinic_id: formData.clinic_id,
             clinic_name: formData.clinic_name,
-            address_line1: formData.address_line1,
-            address_line2: formData.address_line2,
-            city: formData.city,
-            state: formData.postal_code,
             languages: formData.languages,
           },
         }),
@@ -243,7 +237,7 @@ export default function DoctorProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-7xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
         <p className="text-gray-600">Update your professional information</p>
@@ -253,7 +247,7 @@ export default function DoctorProfilePage() {
         {/* Profile Picture */}
         <div className="glass-card p-6 rounded-2xl">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Profile Picture</h2>
-          
+
           <div className="flex items-center space-x-6">
             <div className="relative">
               <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-primary-100 to-secondary-100 flex items-center justify-center">
@@ -285,7 +279,7 @@ export default function DoctorProfilePage() {
                 />
                 <div
                   onClick={() => document.getElementById('profile-picture-upload')?.click()}
-                  className="cursor-pointer px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-semibold hover:shadow-lg smooth-transition inline-flex items-center space-x-2"
+                  className="cursor-pointer px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg smooth-transition inline-flex items-center space-x-2"
                 >
                   <User className="w-5 h-5" />
                   <span>{profileImage ? 'Change Picture' : 'Upload Picture'}</span>
@@ -304,7 +298,7 @@ export default function DoctorProfilePage() {
             <User className="w-5 h-5" />
             <span>Personal Information</span>
           </h2>
-          
+
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -348,7 +342,7 @@ export default function DoctorProfilePage() {
         {/* Professional Details */}
         <div className="glass-card p-6 rounded-2xl">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Professional Details</h2>
-          
+
           <div className="grid gap-6">
             {/* Specializations */}
             <div>
@@ -361,11 +355,10 @@ export default function DoctorProfilePage() {
                     key={spec}
                     type="button"
                     onClick={() => toggleSpecialization(spec)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium smooth-transition ${
-                      formData.specialization.includes(spec)
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium smooth-transition ${formData.specialization.includes(spec)
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
                   >
                     {spec}
                   </button>
@@ -386,7 +379,7 @@ export default function DoctorProfilePage() {
                 placeholder="Chronic Pain Management, Arthritis Treatment, Skin Disorders, Hair Loss Treatment, PCOS, Acidity, Constipation, etc."
               />
               <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-                <strong>💡 SEO Tip:</strong> Add specific conditions, symptoms, or treatments you specialize in (comma-separated). 
+                <strong>💡 SEO Tip:</strong> Add specific conditions, symptoms, or treatments you specialize in (comma-separated).
                 This helps patients find you when they search! Examples: "Migraine, Insomnia, Fertility Issues, Digestive Problems"
               </p>
             </div>
@@ -456,11 +449,10 @@ export default function DoctorProfilePage() {
                     key={lang}
                     type="button"
                     onClick={() => toggleLanguage(lang)}
-                    className={`px-3 py-1 rounded-lg text-sm font-medium smooth-transition ${
-                      formData.languages.includes(lang)
-                        ? 'bg-secondary-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium smooth-transition ${formData.languages.includes(lang)
+                      ? 'bg-secondary-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
                   >
                     {lang}
                   </button>
@@ -486,7 +478,7 @@ export default function DoctorProfilePage() {
         {/* Clinic Affiliation */}
         <div className="glass-card p-6 rounded-2xl">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Clinic Affiliation</h2>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -497,8 +489,8 @@ export default function DoctorProfilePage() {
                 onChange={(e) => {
                   const selectedClinicId = e.target.value || null;
                   const selectedClinic = clinics.find(c => c.clinic_id === selectedClinicId);
-                  setFormData({ 
-                    ...formData, 
+                  setFormData({
+                    ...formData,
                     clinic_id: selectedClinicId,
                     clinic_name: selectedClinic?.clinic_name || ''
                   });
@@ -517,101 +509,47 @@ export default function DoctorProfilePage() {
               </p>
             </div>
 
-            {formData.clinic_id && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-sm text-green-700">
-                  ✓ You are affiliated with <strong>{formData.clinic_name}</strong>
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Clinic Details */}
-        <div className="glass-card p-6 rounded-2xl">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Practice Location</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            {formData.clinic_id ? (
-              "Optional: Add additional practice location details (if different from affiliated clinic)"
-            ) : (
-              "Add your practice location details"
-            )}
-          </p>
-          
-          <div className="grid gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Clinic Name
-              </label>
-              <input
-                type="text"
-                value={formData.clinic_name}
-                onChange={(e) => setFormData({ ...formData, clinic_name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Address Line 1
-              </label>
-              <input
-                type="text"
-                value={formData.address_line1}
-                onChange={(e) => setFormData({ ...formData, address_line1: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Address Line 2
-              </label>
-              <input
-                type="text"
-                value={formData.address_line2}
-                onChange={(e) => setFormData({ ...formData, address_line2: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-              />
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  State
-                </label>
-                <input
-                  type="text"
-                  value={formData.state}
-                  onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Postal Code
-                </label>
-                <input
-                  type="text"
-                  value={formData.postal_code}
-                  onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-                />
-              </div>
-            </div>
+            {formData.clinic_id && (() => {
+              const selectedClinic = clinics.find(c => c.clinic_id === formData.clinic_id);
+              if (!selectedClinic) return null;
+              
+              return (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p className="text-sm font-semibold text-green-800 mb-3">
+                    ✓ You are affiliated with <strong>{selectedClinic.clinic_name}</strong>
+                  </p>
+                  
+                  <div className="grid md:grid-cols-2 gap-4 text-xs text-green-700">
+                    <div className="space-y-1">
+                      <p className="font-semibold text-green-800">Address:</p>
+                      <p>{selectedClinic.address_line1 || 'No address provided'}</p>
+                      {selectedClinic.address_line2 && <p>{selectedClinic.address_line2}</p>}
+                      <p>
+                        {[selectedClinic.city, selectedClinic.state, selectedClinic.postal_code].filter(Boolean).join(', ')}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className="font-semibold text-green-800">Contact Details:</p>
+                      {selectedClinic.phone && (
+                        <p>📞 {selectedClinic.phone}</p>
+                      )}
+                      {selectedClinic.email && (
+                        <p>✉️ {selectedClinic.email}</p>
+                      )}
+                      {selectedClinic.website && (
+                        <p>🌐 <a href={selectedClinic.website} target="_blank" rel="noopener noreferrer" className="underline hover:text-green-900">
+                          {selectedClinic.website.replace(/^https?:\/\//, '')}
+                        </a></p>
+                      )}
+                      {!selectedClinic.phone && !selectedClinic.email && !selectedClinic.website && (
+                        <p className="italic text-green-600">No contact details available</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
@@ -620,7 +558,7 @@ export default function DoctorProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="px-8 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-semibold hover:shadow-lg smooth-transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+            className="px-8 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg smooth-transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
             {saving ? (
               <>
