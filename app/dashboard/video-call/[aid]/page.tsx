@@ -19,16 +19,18 @@ export default function DoctorVideoCallPage() {
   const [callDurationSeconds, setCallDurationSeconds] = useState<number>(0);
   const [showPostCallModal, setShowPostCallModal] = useState(false);
   const [liveTimerInterval, setLiveTimerInterval] = useState<NodeJS.Timeout | null>(null);
+  const hasJoinedRoom = useRef(false); // Track if user has actually joined
+  const hasInitialized = useRef(false); // Prevent multiple initializations
 
   useEffect(() => {
     console.log('[DOCTOR] Component mounted, starting initialization...');
-    
+
     // Only run on client side
     if (typeof window === 'undefined') {
       console.log('[DOCTOR] Not in browser, skipping');
       return;
     }
-    
+
     // Small delay to ensure DOM is ready
     const timer = setTimeout(() => {
       console.log('[DOCTOR] Timer fired, calling init function');
@@ -38,17 +40,40 @@ export default function DoctorVideoCallPage() {
     return () => {
       clearTimeout(timer);
       console.log('[DOCTOR] Cleanup called');
+
+      // Reset flags
+      hasJoinedRoom.current = false;
+      hasInitialized.current = false;
+
+      // Cleanup timer
+      if (liveTimerInterval) {
+        clearInterval(liveTimerInterval);
+        setLiveTimerInterval(null);
+      }
+
+      // Cleanup ZegoCloud instance
       if (zpRef.current) {
         try {
+          console.log('[DOCTOR] Destroying ZegoCloud instance');
           zpRef.current.destroy();
+          zpRef.current = null;
         } catch (e) {
-          console.log('[DOCTOR] ZegoCloud cleanup:', e);
+          console.log('[DOCTOR] ZegoCloud cleanup error:', e);
         }
       }
     };
   }, [aid]);
 
   async function fetchAppointmentAndInitCall() {
+    // Prevent multiple initializations
+    if (hasInitialized.current) {
+      console.log('[DOCTOR] Already initialized, skipping');
+      return;
+    }
+
+    hasInitialized.current = true;
+    console.log('[DOCTOR] Starting initialization...');
+
     const timeoutId = setTimeout(() => {
       const errorMsg = 'Connection timeout - please check your camera/microphone permissions and internet connection';
       setError(errorMsg);
@@ -58,7 +83,7 @@ export default function DoctorVideoCallPage() {
 
     try {
       console.log('Starting video call initialization...');
-      
+
       // Check if container is available
       if (!containerRef.current) {
         throw new Error('Video container not ready');
@@ -104,16 +129,20 @@ export default function DoctorVideoCallPage() {
       // Initialize ZegoCloud
       const appID = parseInt(process.env.NEXT_PUBLIC_ZEGO_APP_ID!);
       const serverSecret = process.env.NEXT_PUBLIC_ZEGO_SERVER_SECRET || '';
-      
+
       if (!appID || !serverSecret) {
         throw new Error('ZegoCloud credentials missing');
       }
 
       const roomID = `appointment_${aid}`;
-      const userID = user.uid;
+      // Sanitize userID - remove dashes and special characters for ZegoCloud compatibility
+      const userID = user.uid.replace(/-/g, '');
       const userName = user.name || 'Doctor';
 
-      console.log('Generating token for room:', roomID);
+      console.log('Using sanitized UserID:', userID);
+      console.log('Generating kit token for room:', roomID);
+
+      // Generate kit token for ZegoCloud
       const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
         appID,
         serverSecret,
@@ -122,12 +151,24 @@ export default function DoctorVideoCallPage() {
         userName
       );
 
+      console.log('Kit token generated successfully');
       console.log('Creating ZegoCloud instance...');
+
       const zp = ZegoUIKitPrebuilt.create(kitToken);
+
+      if (!zp) {
+        throw new Error('Failed to create ZegoCloud instance');
+      }
+
       zpRef.current = zp;
-      
+
+      // Double-check container is still available
+      if (!containerRef.current) {
+        throw new Error('Video container disappeared during initialization');
+      }
+
       console.log('[DOCTOR] Joining room...');
-      
+
       // Don't await - just start the join process
       zp.joinRoom({
         container: containerRef.current,
@@ -140,36 +181,51 @@ export default function DoctorVideoCallPage() {
         maxUsers: 2,
         onLeaveRoom: () => {
           console.log('[DOCTOR] onLeaveRoom triggered!');
+
+          // Only process if user has actually joined the room
+          if (!hasJoinedRoom.current) {
+            console.log('[DOCTOR] Ignoring onLeaveRoom - user never joined');
+            return;
+          }
+
           clearTimeout(timeoutId);
-          
+
           // Stop live timer
           if (liveTimerInterval) {
             clearInterval(liveTimerInterval);
           }
-          
+
           // Calculate final duration
           if (callStartTime) {
             const endTime = new Date();
             const durationMs = endTime.getTime() - callStartTime.getTime();
             const durationSeconds = Math.floor(durationMs / 1000);
             const durationMinutes = durationSeconds / 60; // Decimal minutes for database
-            
+
             setCallDurationSeconds(durationSeconds);
-            
+
             // Update appointment with call times
             updateCallDuration(callStartTime, endTime, durationMinutes);
           }
-          
+
           setShowPostCallModal(true);
         },
         onJoinRoom: async () => {
           console.log('[DOCTOR] Successfully joined room!');
+
+          // Prevent duplicate onJoinRoom calls
+          if (hasJoinedRoom.current) {
+            console.log('[DOCTOR] Already joined, ignoring duplicate onJoinRoom');
+            return;
+          }
+
+          hasJoinedRoom.current = true; // Mark that user has joined
           clearTimeout(timeoutId);
-          
+
           // Start call on server and get synchronized start time
           const startTime = await startCall();
           setCallStartTime(startTime);
-          
+
           // Start live timer (updates every second)
           const timer = setInterval(() => {
             const now = new Date();
@@ -191,13 +247,17 @@ export default function DoctorVideoCallPage() {
       clearTimeout(timeoutId);
       setLoading(false);
     } catch (error: any) {
-      console.error('Video call error:', error);
+      console.error('[DOCTOR] Video call initialization error:', error);
       clearTimeout(timeoutId);
+
+      // Reset initialization flag to allow retry
+      hasInitialized.current = false;
+
       const errorMsg = error.message || 'Failed to initialize video call';
       setError(errorMsg);
       toast.error(errorMsg);
       setLoading(false);
-      
+
       // Redirect after showing error
       setTimeout(() => {
         router.push('/dashboard/appointments');
@@ -210,7 +270,7 @@ export default function DoctorVideoCallPage() {
       console.log('[DOCTOR] Notifying server: Call Started');
       const response = await fetch(`/api/appointments/${aid}/start-call`, { method: 'POST' });
       const data = await response.json();
-      
+
       if (data.success && data.data?.call_started_at) {
         return new Date(data.data.call_started_at);
       }
@@ -241,7 +301,7 @@ export default function DoctorVideoCallPage() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         console.log('[DOCTOR] ✅ Call duration updated successfully:', data);
       } else {
@@ -262,9 +322,9 @@ export default function DoctorVideoCallPage() {
   return (
     <div className="relative w-full h-screen bg-gray-900">
       {/* Video Call Container - Hidden when call ends */}
-      <div 
-        ref={containerRef} 
-        className="w-full h-full" 
+      <div
+        ref={containerRef}
+        className="w-full h-full"
         style={{ display: showPostCallModal ? 'none' : 'block' }}
       />
 

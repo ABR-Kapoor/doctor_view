@@ -66,10 +66,10 @@ export default function PatientsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-7xl mx-auto">
       {/* Compact Header */}
       <div className="mb-4">
-        <h1 className="text-3xl font-black text-gray-900 mb-1"><TranslatedText>My Patients</TranslatedText></h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-1"><TranslatedText>My Patients</TranslatedText></h1>
         <p className="text-gray-600 text-sm"><TranslatedText>View and manage patient records with adherence tracking</TranslatedText></p>
       </div>
 
@@ -98,13 +98,13 @@ export default function PatientsPage() {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPatients.map((patient) => {
-            const adherenceColor = 
+            const adherenceColor =
               patient.adherenceRate >= 80 ? 'text-green-600' :
-              patient.adherenceRate >= 60 ? 'text-amber-600' :
-              'text-red-600';
+                patient.adherenceRate >= 60 ? 'text-amber-600' :
+                  'text-red-600';
 
             return (
-              <div 
+              <div
                 key={patient.pid}
                 className="group relative h-[400px] bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer"
               >
@@ -129,7 +129,7 @@ export default function PatientsPage() {
                   <h3 className="text-3xl font-black mb-3 drop-shadow-md truncate">
                     <TranslatedText>{patient.user.name}</TranslatedText>
                   </h3>
-                  
+
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="flex items-center space-x-1">
                       <TrendingUp className="w-4 h-4 text-gray-300" />
@@ -147,7 +147,7 @@ export default function PatientsPage() {
 
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-black/80 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center p-8 text-center z-20 transform scale-95 group-hover:scale-100">
-                  
+
                   {/* Patient Photo and Name */}
                   <div className="w-20 h-20 rounded-3xl overflow-hidden border-2 border-white mb-3 shadow-xl">
                     {patient.user?.profile_image_url ? (
@@ -158,7 +158,7 @@ export default function PatientsPage() {
                       </div>
                     )}
                   </div>
-                  
+
                   <h3 className="text-white font-black text-xl mb-4"><TranslatedText>{patient.user.name}</TranslatedText></h3>
 
                   {/* Patient Info */}
@@ -171,7 +171,7 @@ export default function PatientsPage() {
                         </div>
                       </div>
                     )}
-                    
+
                     {patient.user?.phone && (
                       <div className="bg-white/10 rounded-xl p-3 border border-white/20">
                         <div className="flex items-center space-x-2 text-sm text-white">

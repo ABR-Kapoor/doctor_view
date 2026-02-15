@@ -27,16 +27,16 @@ export const LanguageSwitcher: React.FC = () => {
   return (
     <div className="relative inline-block">
       <div className="flex items-center gap-2">
-        <Globe className="w-5 h-5 text-gray-600" />
+        <Globe className="w-5 h-5 text-black" />
         <select
           value={currentLocale}
           onChange={(e) => setLocale(e.target.value)}
           disabled={isTranslating}
-          className="px-3 py-2 pr-8 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm appearance-none cursor-pointer hover:border-primary-400 transition-colors"
+          className="px-3 py-2 pr-8 border border-black/20 rounded-lg bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-black/20 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium text-black appearance-none cursor-pointer hover:bg-white/70 transition-colors"
           style={{ backgroundImage: 'none' }}
         >
           {availableLocales.map((locale) => (
-            <option key={locale} value={locale}>
+            <option key={locale} value={locale} className="text-black bg-white">
               {languageNames[locale] || locale.toUpperCase()}
             </option>
           ))}

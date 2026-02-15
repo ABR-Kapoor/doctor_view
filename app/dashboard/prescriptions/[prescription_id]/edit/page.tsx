@@ -55,7 +55,7 @@ export default function EditPrescriptionPage() {
 
       if (data.success) {
         const prescription = data.prescriptions.find((p: any) => p.prescription_id === prescriptionId);
-        
+
         if (prescription) {
           setPatientName(prescription.patients?.user?.name || '');
           setDiagnosis(prescription.diagnosis || '');
@@ -151,11 +151,11 @@ export default function EditPrescriptionPage() {
           <h1 className="text-3xl font-bold text-gray-900"><TranslatedText>Edit Prescription</TranslatedText></h1>
           <p className="text-gray-600">
             {patientName ? (
-                <>
-                    <TranslatedText>For</TranslatedText> <TranslatedText>{patientName}</TranslatedText>
-                </>
+              <>
+                <TranslatedText>For</TranslatedText> <TranslatedText>{patientName}</TranslatedText>
+              </>
             ) : (
-                <TranslatedText>Update prescription details</TranslatedText>
+              <TranslatedText>Update prescription details</TranslatedText>
             )}
           </p>
         </div>
@@ -329,7 +329,7 @@ export default function EditPrescriptionPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-semibold hover:shadow-lg smooth-transition disabled:opacity-50 flex items-center justify-center space-x-2"
+            className="flex-1 px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg smooth-transition disabled:opacity-50 flex items-center justify-center space-x-2"
           >
             <Save className="w-5 h-5" />
             <span><TranslatedText>{saving ? 'Saving...' : 'Save Changes'}</TranslatedText></span>

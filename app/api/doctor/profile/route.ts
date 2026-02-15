@@ -27,14 +27,24 @@ export async function GET(request: NextRequest) {
 
         const { data: doctor } = await supabase
             .from('doctors')
-            .select('*')
+            .select(`
+                *,
+                clinics:clinic_id (
+                    clinic_id,
+                    clinic_name,
+                    city,
+                    state
+                )
+            `)
             .eq('uid', uid)
             .single();
 
-        // Combine user's profile_image_url with doctor data
+        // Combine user's profile_image_url with doctor data and clinic info
         const doctorWithImage = doctor ? {
             ...doctor,
-            profile_image_url: user?.profile_image_url || null
+            profile_image_url: user?.profile_image_url || null,
+            // Override clinic_name with the actual clinic name from clinics table if clinic_id exists
+            clinic_name: doctor.clinics?.clinic_name || doctor.clinic_name || ''
         } : null;
 
         return NextResponse.json({
@@ -99,25 +109,31 @@ export async function PATCH(request: NextRequest) {
 
             if (existingDoctor) {
                 // Update existing doctor
+                const updateData: any = {
+                    specialization: doctor.specialization, // Array of specializations
+                    custom_specializations: doctor.custom_specializations, // Custom SEO keywords
+                    qualification: doctor.qualification,
+                    registration_number: doctor.registration_number,
+                    years_of_experience: doctor.years_of_experience,
+                    consultation_fee: doctor.consultation_fee,
+                    bio: doctor.bio,
+                    clinic_id: doctor.clinic_id, // Allow doctors to select/change their clinic
+                    address_line1: doctor.address_line1,
+                    address_line2: doctor.address_line2,
+                    city: doctor.city,
+                    state: doctor.state,
+                    postal_code: doctor.postal_code,
+                    languages: doctor.languages,
+                };
+
+                // Only save clinic_name if no clinic_id (independent doctor)
+                if (!doctor.clinic_id) {
+                    updateData.clinic_name = doctor.clinic_name;
+                }
+
                 const { error: doctorError } = await supabase
                     .from('doctors')
-                    .update({
-                        specialization: doctor.specialization, // Array of specializations
-                        custom_specializations: doctor.custom_specializations, // Custom SEO keywords
-                        qualification: doctor.qualification,
-                        registration_number: doctor.registration_number,
-                        years_of_experience: doctor.years_of_experience,
-                        consultation_fee: doctor.consultation_fee,
-                        bio: doctor.bio,
-                        clinic_id: doctor.clinic_id, // Allow doctors to select/change their clinic
-                        clinic_name: doctor.clinic_name,
-                        address_line1: doctor.address_line1,
-                        address_line2: doctor.address_line2,
-                        city: doctor.city,
-                        state: doctor.state,
-                        postal_code: doctor.postal_code,
-                        languages: doctor.languages,
-                    })
+                    .update(updateData)
                     .eq('uid', uid);
 
                 if (doctorError) throw doctorError;

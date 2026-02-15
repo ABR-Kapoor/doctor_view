@@ -11,7 +11,7 @@ export async function GET() {
   try {
     const { data: clinics, error } = await supabaseAdmin
       .from('clinics')
-      .select('clinic_id, clinic_name, city, state, country, is_verified')
+      .select('*')
       .order('clinic_name', { ascending: true });
 
     if (error) {
