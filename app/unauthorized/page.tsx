@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { AlertCircle, ArrowLeft } from 'lucide-react';
+import { AlertCircle, ArrowLeft, LogOut } from 'lucide-react';
+import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
 import Link from 'next/link';
 
 export default function UnauthorizedAccess() {
@@ -41,9 +42,16 @@ export default function UnauthorizedAccess() {
 
           {/* Actions */}
           <div className="space-y-3">
+            <LogoutLink
+              className="w-full py-3 px-6 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-2xl font-bold hover:shadow-lg smooth-transition flex items-center justify-center space-x-2"
+            >
+              <LogOut className="w-5 h-5" />
+              <span>Logout & Switch Account</span>
+            </LogoutLink>
+
             <a
               href="http://localhost:3000/dashboard"
-              className="w-full py-3 px-6 bg-gradient-to-r from-primary-600 to-emerald-600 text-white rounded-2xl font-bold hover:shadow-lg smooth-transition flex items-center justify-center space-x-2"
+              className="w-full py-3 px-6 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-2xl font-bold hover:shadow-lg smooth-transition flex items-center justify-center space-x-2"
             >
               <span>Go to Patient Portal</span>
             </a>

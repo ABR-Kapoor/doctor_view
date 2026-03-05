@@ -1,75 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import sql from '@/lib/db';
 
-export async function GET(
-    request: NextRequest,
-    { params }: { params: { patientId: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { patientId: string } }) {
     try {
         const { patientId } = params;
 
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        const [patient] = await sql`
+            SELECT p.pid, p.uid, p.date_of_birth, p.gender, p.blood_group, p.allergies, p.chronic_conditions, p.current_medications,
+                   u.name, u.email, u.phone, u.profile_image_url
+            FROM patients p
+            JOIN users u ON p.uid = u.uid
+            WHERE p.pid = ${patientId}
+        `;
 
-        // Get patient details with user info
-        const { data: patient, error: patientError } = await supabase
-            .from('patients')
-            .select(`
-        pid,
-        uid,
-        date_of_birth,
-        gender,
-        blood_group,
-        allergies,
-        chronic_conditions,
-        current_medications,
-        users (
-          name,
-          email,
-          phone,
-          profile_image_url
-        )
-      `)
-            .eq('pid', patientId)
-            .single();
-
-        if (patientError || !patient) {
-            return NextResponse.json(
-                { success: false, error: 'Patient not found' },
-                { status: 404 }
-            );
+        if (!patient) {
+            return NextResponse.json({ success: false, error: 'Patient not found' }, { status: 404 });
         }
 
-        // Get appointment history for this patient with this doctor
-        const { data: appointments, error: apptsError } = await supabase
-            .from('appointments')
-            .select(`
-        aid,
-        scheduled_date,
-        scheduled_time,
-        mode,
-        status,
-        chief_complaint,
-        duration_minutes
-      `)
-            .eq('pid', patientId)
-            .order('scheduled_date', { ascending: false });
+        const appointments = await sql`
+            SELECT aid, scheduled_date, scheduled_time, mode, status, chief_complaint, duration_minutes
+            FROM appointments WHERE pid = ${patientId}
+            ORDER BY scheduled_date DESC
+        `;
 
         return NextResponse.json({
             success: true,
             patient: {
                 ...patient,
-                user: Array.isArray(patient.users) ? patient.users[0] : patient.users,
+                user: { name: patient.name, email: patient.email, phone: patient.phone, profile_image_url: patient.profile_image_url },
             },
             appointments: appointments || [],
         });
     } catch (error: any) {
         console.error('[API] Patient detail error:', error);
-        return NextResponse.json(
-            { success: false, error: error.message || 'Internal server error' },
-            { status: 500 }
-        );
+        return NextResponse.json({ success: false, error: error.message || 'Internal server error' }, { status: 500 });
     }
 }

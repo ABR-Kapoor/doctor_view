@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import sql from '@/lib/db';
 
 export async function GET() {
     try {
@@ -21,51 +16,23 @@ export async function GET() {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        // Check if user exists in Supabase
-        const { data: existingUser } = await supabase
-            .from('users')
-            .select('*')
-            .eq('auth_id', kindeUser.id)
-            .single();
+        const [existingUser] = await sql`SELECT * FROM users WHERE auth_id = ${kindeUser.id}`;
 
         if (existingUser) {
-            // Update role to 'doctor' since they're logging in through doctor_view
-            await supabase
-                .from('users')
-                .update({
-                    last_login: new Date().toISOString(),
-                    role: 'doctor' // Always set to doctor when logging in through doctor_view
-                })
-                .eq('uid', existingUser.uid);
+            await sql`
+                UPDATE users SET last_login = ${new Date().toISOString()}, role = 'doctor'
+                WHERE uid = ${existingUser.uid}
+            `;
 
-            // Fetch updated user data
-            const { data: updatedUser } = await supabase
-                .from('users')
-                .select('*')
-                .eq('uid', existingUser.uid)
-                .single();
-
+            const [updatedUser] = await sql`SELECT * FROM users WHERE uid = ${existingUser.uid}`;
             return NextResponse.json({ user: updatedUser || existingUser });
         }
 
-        // Create new user in Supabase with doctor role
-        const { data: newUser, error } = await supabase
-            .from('users')
-            .insert({
-                auth_id: kindeUser.id,
-                email: kindeUser.email || '',
-                name: `${kindeUser.given_name || ''} ${kindeUser.family_name || ''}`.trim() || 'Doctor',
-                role: 'doctor', // Doctor role for this portal
-                is_verified: true,
-                last_login: new Date().toISOString(),
-            })
-            .select()
-            .single();
-
-        if (error) {
-            console.error('Error creating user:', error);
-            return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
-        }
+        const [newUser] = await sql`
+            INSERT INTO users (auth_id, email, name, role, is_verified, last_login)
+            VALUES (${kindeUser.id}, ${kindeUser.email || ''}, ${`${kindeUser.given_name || ''} ${kindeUser.family_name || ''}`.trim() || 'Doctor'}, 'doctor', true, ${new Date().toISOString()})
+            RETURNING *
+        `;
 
         return NextResponse.json({ user: newUser, isNew: true });
     } catch (error) {

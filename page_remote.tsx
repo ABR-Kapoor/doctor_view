@@ -51,11 +51,6 @@ export default function DoctorProfilePage() {
     clinic_id: null as string | null, // Selected clinic
     clinic_name: '',
     languages: [] as string[],
-    address_line1: '',
-    address_line2: '',
-    city: '',
-    state: '',
-    postal_code: '',
   });
 
   const [uid, setUid] = useState('');
@@ -159,11 +154,6 @@ export default function DoctorProfilePage() {
           clinic_id: data.doctor?.clinic_id || null,
           clinic_name: data.doctor?.clinic_name || '',
           languages: data.doctor?.languages || [],
-          address_line1: data.doctor?.address_line1 || '',
-          address_line2: data.doctor?.address_line2 || '',
-          city: data.doctor?.city || '',
-          state: data.doctor?.state || '',
-          postal_code: data.doctor?.postal_code || '',
         });
       }
     } catch (error) {
@@ -199,11 +189,6 @@ export default function DoctorProfilePage() {
             clinic_id: formData.clinic_id,
             clinic_name: formData.clinic_name,
             languages: formData.languages,
-            address_line1: formData.address_line1,
-            address_line2: formData.address_line2,
-            city: formData.city,
-            state: formData.state,
-            postal_code: formData.postal_code,
           },
         }),
       });
@@ -394,7 +379,7 @@ export default function DoctorProfilePage() {
             {/* Custom Specializations (SEO Keywords) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Other Specializations (SEO Keywords) =ƒÆí
+                Other Specializations (SEO Keywords) ≡ƒÆí
               </label>
               <textarea
                 value={formData.custom_specializations}
@@ -404,7 +389,7 @@ export default function DoctorProfilePage() {
                 placeholder="Chronic Pain Management, Arthritis Treatment, Skin Disorders, Hair Loss Treatment, PCOS, Acidity, Constipation, etc."
               />
               <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-                <strong>=ƒÆí SEO Tip:</strong> Add specific conditions, symptoms, or treatments you specialize in (comma-separated).
+                <strong>≡ƒÆí SEO Tip:</strong> Add specific conditions, symptoms, or treatments you specialize in (comma-separated).
                 This helps patients find you when they search! Examples: "Migraine, Insomnia, Fertility Issues, Digestive Problems"
               </p>
             </div>
@@ -451,7 +436,7 @@ export default function DoctorProfilePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Consultation Fee (Gé¦)
+                  Consultation Fee (Γé╣)
                 </label>
                 <input
                   type="number"
@@ -559,7 +544,7 @@ export default function DoctorProfilePage() {
               return (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <p className="text-sm font-semibold text-green-800 mb-3">
-                    G£ô You are affiliated with <strong>{selectedClinic.clinic_name}</strong>
+                    Γ£ô You are affiliated with <strong>{selectedClinic.clinic_name}</strong>
                   </p>
                   
                   <div className="grid md:grid-cols-2 gap-4 text-xs text-green-700">
@@ -575,13 +560,13 @@ export default function DoctorProfilePage() {
                     <div className="space-y-1">
                       <p className="font-semibold text-green-800">Contact Details:</p>
                       {selectedClinic.phone && (
-                        <p>=ƒôP {selectedClinic.phone}</p>
+                        <p>≡ƒô₧ {selectedClinic.phone}</p>
                       )}
                       {selectedClinic.email && (
-                        <p>G£ën+Å {selectedClinic.email}</p>
+                        <p>Γ£ë∩╕Å {selectedClinic.email}</p>
                       )}
                       {selectedClinic.website && (
-                        <p>=ƒîÉ <a href={selectedClinic.website} target="_blank" rel="noopener noreferrer" className="underline hover:text-green-900">
+                        <p>≡ƒîÉ <a href={selectedClinic.website} target="_blank" rel="noopener noreferrer" className="underline hover:text-green-900">
                           {selectedClinic.website.replace(/^https?:\/\//, '')}
                         </a></p>
                       )}
@@ -593,77 +578,6 @@ export default function DoctorProfilePage() {
                 </div>
               );
             })()}
-
-            {/* Independent Doctor Address Fields */}
-            {!formData.clinic_id && (
-              <div className="space-y-4 pt-4 border-t border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-800">Independent Practice Address</h3>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Address Line 1
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.address_line1}
-                      onChange={(e) => setFormData({ ...formData, address_line1: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-                      placeholder="Clinic/Hospital Name, Street"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Address Line 2
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.address_line2}
-                      onChange={(e) => setFormData({ ...formData, address_line2: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-                      placeholder="Area, Landmark"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      State
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.state}
-                      onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Postal Code
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.postal_code}
-                      onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 

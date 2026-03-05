@@ -2,12 +2,14 @@
 // CORE USER MANAGEMENT
 // ============================================
 
+export type UserRole = 'patient' | 'doctor' | 'admin' | 'clinic';
+
 export interface User {
   uid: string;
   email: string;
   phone?: string;
   password_hash?: string;
-  role: 'patient' | 'doctor' | 'admin' | 'clinic';
+  role: UserRole;
   name: string;
   profile_image_url?: string;
   is_verified: boolean;
@@ -92,12 +94,14 @@ export interface Clinic {
 // APPOINTMENTS & MEDICAL
 // ============================================
 
+export type AppointmentStatus = 'scheduled' | 'confirmed' | 'cancelled' | 'completed' | 'rescheduled' | 'in_progress' | 'pending';
+
 export interface Appointment {
   aid: string;
   pid: string;
   did: string;
   mode: 'online' | 'offline' | 'in_person';
-  status: 'scheduled' | 'confirmed' | 'cancelled' | 'completed' | 'rescheduled' | 'in_progress' | 'pending';
+  status: AppointmentStatus;
   scheduled_date: string;
   scheduled_time: string;
   start_time?: string;
@@ -383,3 +387,30 @@ export interface AdherenceProgress {
 
 export interface Product extends Medicine { }
 export interface DeliveryBoy extends DeliveryAgent { }
+
+// ============================================
+// UI & CHART DATA
+// ============================================
+
+export interface MedicationChartData {
+  date: string;
+  taken: number;
+  skipped: number;
+  total: number;
+}
+
+export interface AdherenceDonutData {
+  name: string;
+  value: number;
+  percentage: number;
+}
+
+export interface AppointmentTimelineData {
+  aid: string;
+  date: string;
+  time: string;
+  doctor_name: string;
+  status: string;
+  mode: string;
+}
+

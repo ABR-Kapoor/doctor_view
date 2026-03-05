@@ -1,100 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import sql from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// Use service role key for prescriptions to bypass RLS
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const {
-            pid,
-            did,
-            aid,
-            diagnosis,
-            symptoms,
-            medicines,
-            instructions,
-            diet_advice,
-            follow_up_date,
-        } = body;
+        const { pid, did, aid, diagnosis, symptoms, medicines, instructions, diet_advice, follow_up_date } = body;
 
         if (!pid || !did || !diagnosis || !medicines || medicines.length === 0) {
-            return NextResponse.json(
-                { success: false, error: 'Missing required fields' },
-                { status: 400 }
-            );
+            return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
         }
 
-        console.log('[API] Creating prescription with medicines:', JSON.stringify(medicines, null, 2));
+        const [data] = await sql`
+            INSERT INTO prescriptions (pid, did, aid, diagnosis, symptoms, medicines, instructions, diet_advice, follow_up_date, ai_generated, is_active)
+            VALUES (${pid}, ${did}, ${aid || null}, ${diagnosis}, ${symptoms || []}, ${JSON.stringify(medicines)}, ${instructions || null}, ${diet_advice || null}, ${follow_up_date || null}, false, true)
+            RETURNING *
+        `;
 
-        // Create prescription
-        const { data, error } = await supabase
-            .from('prescriptions')
-            .insert({
-                pid,
-                did,
-                aid: aid || null,
-                diagnosis,
-                symptoms: symptoms || [],
-                medicines,
-                instructions: instructions || null,
-                diet_advice: diet_advice || null,
-                follow_up_date: follow_up_date || null,
-                ai_generated: false,
-                is_active: true,
-            })
-            .select()
-            .single();
-
-        if (error) {
-            console.error('[API] Error creating prescription:', error);
-            return NextResponse.json(
-                { success: false, error: error.message },
-                { status: 500 }
-            );
-        }
-
-        console.log('[API] Prescription created:', data.prescription_id);
-
-        // Send notifications to patient and doctor
         try {
             await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/api/notifications/send`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'prescription_created',
-                    data: {
-                        patientId: pid,
-                        doctorId: did,
-                        diagnosis,
-                        medicines,
-                        instructions,
-                    }
-                })
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'prescription_created', data: { patientId: pid, doctorId: did, diagnosis, medicines, instructions } })
             });
-        } catch (notifError) {
-            console.error('Failed to send notification:', notifError);
-            // Don't fail the prescription creation if notification fails
-        }
+        } catch (notifError) { console.error('Failed to send notification:', notifError); }
 
-        return NextResponse.json({
-            success: true,
-            prescription: data,
-            message: 'Prescription created successfully',
-        });
+        return NextResponse.json({ success: true, prescription: data, message: 'Prescription created successfully' });
     } catch (error: any) {
         console.error('[API] Prescription creation error:', error);
-        return NextResponse.json(
-            { success: false, error: error.message || 'Internal server error' },
-            { status: 500 }
-        );
+        return NextResponse.json({ success: false, error: error.message || 'Internal server error' }, { status: 500 });
     }
 }
 
@@ -104,53 +39,28 @@ export async function GET(request: NextRequest) {
         const did = searchParams.get('did');
 
         if (!did) {
-            return NextResponse.json(
-                { success: false, error: 'Doctor ID required' },
-                { status: 400 }
-            );
+            return NextResponse.json({ success: false, error: 'Doctor ID required' }, { status: 400 });
         }
 
-        const { data: prescriptions, error } = await supabase
-            .from('prescriptions')
-            .select(`
-        prescription_id,
-        diagnosis,
-        medicines,
-        created_at,
-        sent_to_patient,
-        sent_at,
-        patients (
-          pid,
-          city,
-          state,
-          users (
-            name,
-            email,
-            profile_image_url
-          )
-        )
-      `)
-            .eq('did', did)
-            .eq('is_active', true)
-            .order('created_at', { ascending: false });
+        const prescriptions = await sql`
+            SELECT p.prescription_id, p.diagnosis, p.medicines, p.created_at, p.sent_to_patient, p.sent_at,
+                   pat.pid, pat.city, pat.state, u.name, u.email, u.profile_image_url
+            FROM prescriptions p
+            JOIN patients pat ON p.pid = pat.pid
+            JOIN users u ON pat.uid = u.uid
+            WHERE p.did = ${did} AND p.is_active = true
+            ORDER BY p.created_at DESC
+        `;
 
-        if (error) {
-            console.error('[API] Error fetching prescriptions:', error);
-            return NextResponse.json(
-                { success: false, error: error.message },
-                { status: 500 }
-            );
-        }
+        const formatted = prescriptions.map(p => ({
+            prescription_id: p.prescription_id, diagnosis: p.diagnosis, medicines: p.medicines,
+            created_at: p.created_at, sent_to_patient: p.sent_to_patient, sent_at: p.sent_at,
+            patients: { pid: p.pid, city: p.city, state: p.state, users: { name: p.name, email: p.email, profile_image_url: p.profile_image_url } }
+        }));
 
-        return NextResponse.json({
-            success: true,
-            prescriptions: prescriptions || [],
-        });
+        return NextResponse.json({ success: true, prescriptions: formatted });
     } catch (error: any) {
         console.error('[API] Prescriptions fetch error:', error);
-        return NextResponse.json(
-            { success: false, error: error.message || 'Internal server error' },
-            { status: 500 }
-        );
+        return NextResponse.json({ success: false, error: error.message || 'Internal server error' }, { status: 500 });
     }
 }

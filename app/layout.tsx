@@ -22,11 +22,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Google Fonts temporarily disabled due to network issues */}
       </head>
-      <body className="font-sans">
+      <body className="font-sans" suppressHydrationWarning>
         <LanguageProvider>
           {children}
         </LanguageProvider>

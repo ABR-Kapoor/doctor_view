@@ -1,9 +1,11 @@
 ﻿import { redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+import Link from 'next/link';
+
+import ProfilePicture from '@/app/components/ProfilePicture';
 import { supabase } from '@/lib/shared/supabase';
 import AuthSync from '@/components/AuthSync';
 import DashboardLayoutClient from '@/app/components/DashboardLayoutClient';
-import DoctorProfileCheck from '@/components/DoctorProfileCheck';
 
 export default async function DoctorDashboardLayout({
   children,
@@ -21,7 +23,7 @@ export default async function DoctorDashboardLayout({
   // Fetch user data from database including name
   let dbUserData = null;
   if (user?.id) {
-    const { data: userData } = await supabase
+    const { data: userData, error } = await supabase
       .from('users')
       .select('role, name, uid')
       .eq('auth_id', user.id)
@@ -45,10 +47,10 @@ export default async function DoctorDashboardLayout({
   return (
     <>
       <AuthSync />
-      <DoctorProfileCheck />
       <DashboardLayoutClient user={mergedUser}>
         {children}
       </DashboardLayoutClient>
     </>
   );
 }
+

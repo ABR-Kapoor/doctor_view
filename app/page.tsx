@@ -1,188 +1,225 @@
 'use client';
 
+import { useState } from 'react';
+import { Sparkles, Loader2, User, Award, MapPin, Menu, X, Stethoscope, Users, BarChart3, FileText, Shield } from 'lucide-react';
+import { LoginLink, RegisterLink, LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import Link from 'next/link';
-import { LoginLink, RegisterLink } from '@kinde-oss/kinde-auth-nextjs/components';
-import { Activity, Stethoscope, Users, BarChart3, FileText, Shield } from 'lucide-react';
-import { LanguageSwitcher } from './components/LanguageSwitcher';
-import { TranslatedText } from './components/TranslatedText';
 
 export default function HomePage() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated } = useKindeBrowserClient();
+
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative">
       {/* Background Image with Overlay */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        {/* Homepage background image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/homepage.png)' }}
-        ></div>
-
-        {/* Overlay to reduce intensity by 40% */}
-        <div className="absolute inset-0 bg-white/40"></div>
-
-        {/* Organic blob shapes for additional depth */}
-        <div className="absolute top-0 -left-40 w-96 h-96 bg-sky-200/5 rounded-full blur-3xl"></div>
-        <div className="absolute top-40 right-0 w-[500px] h-[500px] bg-blue-200/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-1/3 w-[600px] h-[600px] bg-cyan-200/5 rounded-full blur-3xl"></div>
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/landing-bg.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        {/* Blue/Cyan overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-blue-50/30 to-cyan-50/35"></div>
       </div>
 
-      {/* Navigation - Glassmorphism */}
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/70 border-b border-white/20 shadow-sm">
-        <div className="container mx-auto px-6 py-4">
+      {/* Content */}
+      <div className="relative z-10">
+      {/* Navigation */}
+      <nav className="bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-lg relative z-50">
+        <div className="container mx-auto px-4 md:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <img src="/Logos/logo_transparent.png" alt="AuraSutra Logo" className="w-10 h-10 object-contain" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">AuraSutra</span>
-              <span className="text-sm text-gray-600 ml-2"><TranslatedText>Doctor Portal</TranslatedText></span>
+            <div className="flex items-center space-x-3">
+              <img src="/Logos/logo_transparent.png" alt="AuraSutra" className="h-10" />
+              <span className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Alatsi, sans-serif' }}>AuraSutra</span>
+              <span className="text-sm text-blue-600 ml-2 font-semibold">Doctor</span>
             </div>
-            <div className="flex items-center gap-4">
-              {/* Language Switcher */}
-              <LanguageSwitcher />
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-4">
+              {isAuthenticated ? (
+                <div className="flex items-center gap-3">
+                  <Link href="/dashboard" className="px-4 py-2 font-medium text-blue-600 hover:text-blue-700">
+                    Dashboard
+                  </Link>
+                  <LogoutLink className="px-4 py-2 text-red-600 font-medium hover:bg-red-50 rounded-lg transition-colors">
+                    Log out
+                  </LogoutLink>
+                </div>
+              ) : (
+                <>
+                  <LoginLink className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium smooth-transition">
+                    Sign In
+                  </LoginLink>
+                  <RegisterLink className="px-6 py-2.5 bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-800 smooth-transition flex items-center space-x-2">
+                    <span>Register as Doctor</span>
+                    <span>→</span>
+                  </RegisterLink>
+                </>
+              )}
+            </div>
 
-              <LoginLink className="px-6 py-2 text-gray-700 hover:text-sky-600 smooth-transition font-medium">
-                <TranslatedText>Sign In</TranslatedText>
-              </LoginLink>
-              <RegisterLink className="px-6 py-2.5 bg-gradient-to-b from-sky-500 to-blue-600 text-white rounded-lg hover:shadow-lg hover:shadow-sky-200/50 smooth-transition font-semibold">
-                <TranslatedText>Register as Doctor</TranslatedText>
-              </RegisterLink>
-            </div>
+            {/* Mobile Menu Button */}
+            <button 
+              className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
+
+          {/* Mobile Navigation Dropdown */}
+          {isMenuOpen && (
+            <div className="md:hidden pt-4 pb-4 border-t border-gray-100 mt-4 flex flex-col gap-4 animate-in slide-in-from-top-2 duration-200">
+              {isAuthenticated ? (
+                <>
+                  <Link href="/dashboard" className="w-full text-center px-4 py-3 bg-blue-50 rounded-xl text-blue-700 font-medium">
+                    Go to Dashboard
+                  </Link>
+                  <LogoutLink className="w-full text-center px-4 py-3 text-red-600 font-medium hover:bg-red-50 rounded-xl">
+                    Log out
+                  </LogoutLink>
+                </>
+              ) : (
+                <>
+                  <LoginLink className="w-full text-center px-4 py-3 bg-gray-50 rounded-xl text-gray-700 font-medium">
+                    Sign In
+                  </LoginLink>
+                  <RegisterLink className="w-full text-center px-6 py-3 bg-gray-900 text-white rounded-xl font-semibold flex items-center justify-center gap-2">
+                    <span>Register as Doctor</span>
+                    <span>→</span>
+                  </RegisterLink>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-28 pb-24 px-6 relative">
-        <div className="container mx-auto text-center">
-          {/* Premium Badge with fill */}
-          <div className="inline-flex items-center space-x-2 bg-sky-100/80 backdrop-blur-sm text-sky-700 px-5 py-2.5 rounded-full mb-8 animate-fade-in border border-sky-200/50 shadow-sm">
-            <Shield className="w-4 h-4" />
-            <span className="text-sm font-semibold"><TranslatedText>Professional Healthcare Platform</TranslatedText></span>
+      <section className="pt-16 pb-14 md:pt-24 md:pb-20 px-4 md:px-8 w-full overflow-hidden">
+        <div className="container mx-auto max-w-[1400px]">
+          {/* Badge */}
+          <div className="text-center mb-6 md:mb-8">
+            <div className="inline-flex items-center gap-2 bg-blue-50/80 backdrop-blur-sm border border-blue-100 text-blue-800 px-3 py-1 md:px-4 md:py-1.5 rounded-full mb-6 md:mb-8 shadow-sm hover:bg-blue-100/80 smooth-transition cursor-default select-none">
+              <Sparkles className="w-3 h-3 md:w-3.5 md:h-3.5 text-blue-600 animate-pulse" />
+              <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase">
+                Professional Healthcare Platform
+              </span>
+            </div>
+            
+            {/* Main Heading */}
+            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-4 md:mb-6 leading-tight break-words">
+              <span className="block text-gray-900">
+                Empower Your Practice,
+              </span>
+              <span className="block">
+                <span className="text-gray-900">Transform </span>
+                <span className="relative inline-block">
+                  <span className="font-black text-blue-600">Patient Care.</span>
+                </span>
+              </span>
+            </h1>
+            
+            {/* Subtitle */}
+            <p className="text-sm sm:text-base md:text-xl text-gray-600 mb-8 md:mb-12 max-w-2xl mx-auto leading-relaxed px-4">
+              Manage patients, conduct video consultations, create AI-powered prescriptions, and track treatment progress—all in one comprehensive platform
+            </p>
           </div>
 
-          {/* Hero Title - Improved Typography */}
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 mb-8 animate-fade-in leading-tight">
-            <TranslatedText>Empower Your</TranslatedText>{' '}
-            <span className="bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent"><TranslatedText>Ayurvedic Practice</TranslatedText></span>
-          </h1>
-
-          {/* Subtitle - Increased line height */}
-          <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto animate-fade-in leading-relaxed">
-            <TranslatedText>Manage patients, conduct video consultations, create prescriptions, and track treatment progress—all in one comprehensive platform.</TranslatedText>
-          </p>
-
-          {/* CTA Buttons with Enhanced Shadows */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
-            <RegisterLink className="px-10 py-4 bg-gradient-to-b from-sky-500 to-blue-600 text-white rounded-xl font-bold hover:shadow-xl hover:shadow-sky-300/50 smooth-transition text-lg shadow-lg shadow-sky-200/40 hover:scale-105 transform">
-              <TranslatedText>Join as Doctor</TranslatedText>
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in max-w-xl mx-auto">
+            <RegisterLink className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-2xl font-black text-lg hover:shadow-2xl hover:scale-105 smooth-transition text-center">
+              Join as Doctor
             </RegisterLink>
             <Link
               href="#features"
-              className="px-10 py-4 bg-white/80 backdrop-blur-sm text-gray-700 rounded-xl font-semibold hover:shadow-xl smooth-transition text-lg border border-gray-200/50 hover:border-sky-300 hover:bg-white"
+              className="w-full sm:w-auto px-10 py-4 bg-white/70 backdrop-blur-xl text-gray-700 rounded-2xl font-black text-lg hover:shadow-xl smooth-transition text-center border border-white/50"
             >
-              <TranslatedText>Explore Features</TranslatedText>
+              Explore Features
             </Link>
-          </div>
-        </div>
+          </div></div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 px-6">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 mb-4">
-              <TranslatedText>Complete Practice</TranslatedText> <span className="bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent"><TranslatedText>Management</TranslatedText></span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              <TranslatedText>Everything you need to provide exceptional Ayurvedic care</TranslatedText>
-            </p>
-          </div>
+      {!isMenuOpen && (
+        <section id="features" className="pt-16 pb-20 md:pt-28 md:pb-24 px-4 md:px-8 w-full overflow-hidden">
+          <div className="container mx-auto max-w-[1300px]">
+            {/* Centered Heading */}
+            <div className="text-center mb-10 md:mb-16">
+              <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3 md:mb-4">
+                Complete Practice <span className="text-blue-600">Management</span>
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto text-base md:text-lg px-2">
+                Everything you need to provide exceptional Ayurvedic care with modern technology
+              </p>
+            </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <Users className="w-10 h-10 text-sky-600" />,
-                title: 'Patient Management',
-                description: 'Complete patient records with health progress tracking',
-                color: 'from-sky-500/10 to-blue-500/10',
-              },
-              {
-                icon: <img src="/Logos/logo_emblem_total black+transparent.png" alt="AuraSutra" className="h-10" />,
-                title: 'Progress Analytics',
-                description: 'Visualize patient adherence and treatment outcomes',
-                color: 'from-cyan-500/10 to-sky-500/10',
-              },
-              {
-                icon: <FileText className="w-10 h-10 text-blue-600" />,
-                title: 'AI-Powered Prescriptions',
-                description: 'Generate prescriptions with Google Gemini assistance',
-                color: 'from-blue-500/10 to-indigo-500/10',
-              },
-              {
-                icon: <BarChart3 className="w-10 h-10 text-indigo-600" />,
-                title: 'Dashboard Analytics',
-                description: 'Track revenue, appointments, and practice growth',
-                color: 'from-indigo-500/10 to-purple-500/10',
-              },
-              {
-                icon: <Stethoscope className="w-10 h-10 text-sky-600" />,
-                title: 'Video Consultations',
-                description: 'HD video calls with in-consultation prescription creation',
-                color: 'from-sky-500/10 to-cyan-500/10',
-              },
-              {
-                icon: <Shield className="w-10 h-10 text-cyan-600" />,
-                title: 'Secure & Compliant',
-                description: 'HIPAA-compliant data encryption and privacy',
-                color: 'from-cyan-500/10 to-teal-500/10',
-              },
-            ].map((feature, index) => (
-              <div
-                key={index}
-                className="bg-white/60 backdrop-blur-md border border-white/40 p-8 rounded-2xl group hover:bg-white/80 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${feature.color} mb-6 group-hover:scale-110 smooth-transition shadow-sm`}>
-                  {feature.icon}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {[
+                {
+                  icon: <Users className="w-6 h-6 text-blue-500" />,
+                  title: 'Patient Management',
+                  description: 'Complete patient records with health progress tracking and appointment history.',
+                },
+                {
+                  icon: <Stethoscope className="w-6 h-6 text-blue-500" />,
+                  title: 'Video Consultations',
+                  description: 'HD video calls with in-consultation prescription creation and secure communication.',
+                },
+                {
+                  icon: <FileText className="w-6 h-6 text-blue-500" />,
+                  title: 'AI-Powered Prescriptions',
+                  description: 'Generate prescriptions with Google Gemini assistance for accurate treatment plans.',
+                },
+                {
+                  icon: <BarChart3 className="w-6 h-6 text-blue-500" />,
+                  title: 'Dashboard Analytics',
+                  description: 'Track revenue, appointments, and practice growth with comprehensive insights.',
+                },
+                {
+                  icon: <Award className="w-6 h-6 text-blue-500" />,
+                  title: 'Progress Analytics',
+                  description: 'Visualize patient adherence and treatment outcomes with detailed reports.',
+                },
+                {
+                  icon: <Shield className="w-6 h-6 text-blue-500" />,
+                  title: 'Secure & Compliant',
+                  description: 'HIPAA-compliant data encryption and privacy protection for all patient data.',
+                },
+              ].map((feature, index) => (
+                <div key={index} className="relative bg-white/60 backdrop-blur-lg p-6 md:p-8 lg:p-10 rounded-[2rem] shadow-sm hover:shadow-md smooth-transition border border-white/40 flex flex-col items-start text-left h-full hover:bg-white/70 overflow-hidden group">
+                  {/* Texture Overlay */}
+                  <div className="absolute inset-0 bg-[url('/landing-bg.jpg')] bg-cover opacity-100 pointer-events-none z-0 group-hover:opacity-100 smooth-transition mix-blend-overlay"></div>
+                  
+                  <div className="relative z-10 p-3 rounded-2xl bg-blue-50/90 mb-4 md:mb-6 inline-flex items-center justify-center backdrop-blur-sm shadow-sm">
+                    {feature.icon}
+                  </div>
+                  <h3 className="relative z-10 text-lg md:text-xl font-bold text-gray-900 mb-2 md:mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="relative z-10 text-gray-600 leading-relaxed text-sm font-medium">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900"><TranslatedText>{feature.title}</TranslatedText></h3>
-                <p className="text-gray-600 leading-relaxed"><TranslatedText>{feature.description}</TranslatedText></p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 px-6">
-        <div className="container mx-auto">
-          <div className="bg-gradient-to-br from-sky-50 to-blue-50 backdrop-blur-md border border-sky-100/50 p-16 rounded-3xl text-center shadow-xl">
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-6">
-              <TranslatedText>Ready to Transform</TranslatedText> <span className="bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent"><TranslatedText>Your Practice?</TranslatedText></span>
-            </h2>
-            <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-              <TranslatedText>Join the AuraSutra network and provide world-class Ayurvedic care</TranslatedText>
-            </p>
-            <RegisterLink className="inline-flex px-12 py-5 bg-gradient-to-b from-sky-500 to-blue-600 text-white rounded-xl font-bold hover:shadow-2xl hover:shadow-sky-300/50 smooth-transition text-lg shadow-lg shadow-sky-200/40 hover:scale-105 transform">
-              <TranslatedText>Register Now - Free</TranslatedText>
-            </RegisterLink>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-gray-200">
+      <footer className="py-6 px-6 bg-[#2563EB] text-white">
         <div className="container mx-auto text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <img src="/Logos/logo_transparent.png" alt="AuraSutra Logo" className="w-8 h-8 object-contain" />
-            <span className="text-xl font-bold bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">AuraSutra</span>
-          </div>
-          <p className="text-gray-600 mb-4">
-            <TranslatedText>Empowering Ayurvedic practitioners with modern technology</TranslatedText>
-          </p>
-          <p className="text-sm text-gray-500">
-            <TranslatedText>© 2026 AuraSutra. All rights reserved.</TranslatedText>
+          <p className="text-sm font-normal">
+            © 2026 AuraSutra Doctor Portal. Professional Healthcare Simplified.
           </p>
         </div>
       </footer>
+      </div>
     </div>
   );
 }

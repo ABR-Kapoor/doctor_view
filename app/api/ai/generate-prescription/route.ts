@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import sql from '@/lib/db';
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 
@@ -14,92 +9,54 @@ export async function POST(request: NextRequest) {
         const { pid, aid } = await request.json();
 
         if (!pid) {
-            return NextResponse.json(
-                { success: false, error: 'Patient ID required' },
-                { status: 400 }
-            );
+            return NextResponse.json({ success: false, error: 'Patient ID required' }, { status: 400 });
         }
 
-        // Fetch comprehensive patient data
         const patientData = await fetchPatientData(pid, aid);
 
         if (!patientData.success) {
-            return NextResponse.json(
-                { success: false, error: 'Failed to fetch patient data' },
-                { status: 500 }
-            );
+            return NextResponse.json({ success: false, error: 'Failed to fetch patient data' }, { status: 500 });
         }
 
-        // Generate prescription using Gemini AI
         const aiPrescription = await generatePrescriptionWithAI(patientData.data);
-
-        return NextResponse.json({
-            success: true,
-            ...aiPrescription,
-        });
+        return NextResponse.json({ success: true, ...aiPrescription });
     } catch (error: any) {
         console.error('AI Prescription Generation Error:', error);
-        return NextResponse.json(
-            { success: false, error: error.message || 'Failed to generate prescription' },
-            { status: 500 }
-        );
+        return NextResponse.json({ success: false, error: error.message || 'Failed to generate prescription' }, { status: 500 });
     }
 }
 
 async function fetchPatientData(pid: string, aid?: string) {
     try {
-        // Get patient with user details
-        const { data: patient, error: patientError } = await supabase
-            .from('patients')
-            .select(`
-        *,
-        user:users(name, email)
-      `)
-            .eq('pid', pid)
-            .single();
+        const [patient] = await sql`
+            SELECT p.*, u.name, u.email
+            FROM patients p JOIN users u ON p.uid = u.uid
+            WHERE p.pid = ${pid}
+        `;
+        if (!patient) throw new Error('Patient not found');
 
-        if (patientError) throw patientError;
+        const formattedPatient = { ...patient, user: { name: patient.name, email: patient.email } };
 
-        // Get current appointment if aid provided
         let currentAppointment = null;
         if (aid) {
-            const { data: apt } = await supabase
-                .from('appointments')
-                .select('*')
-                .eq('aid', aid)
-                .single();
+            const [apt] = await sql`SELECT * FROM appointments WHERE aid = ${aid}`;
             currentAppointment = apt;
         }
 
-        // Get previous prescriptions (last 3 months)
         const threeMonthsAgo = new Date();
         threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-        const { data: previousPrescriptions } = await supabase
-            .from('prescriptions')
-            .select('*')
-            .eq('pid', pid)
-            .gte('created_at', threeMonthsAgo.toISOString())
-            .order('created_at', { ascending: false })
-            .limit(5);
+        const previousPrescriptions = await sql`
+            SELECT * FROM prescriptions WHERE pid = ${pid} AND created_at >= ${threeMonthsAgo.toISOString()}
+            ORDER BY created_at DESC LIMIT 5
+        `;
 
-        // Get medication adherence data
-        const { data: adherenceData } = await supabase
-            .from('medication_adherence')
-            .select('*')
-            .eq('pid', pid)
-            .order('scheduled_date', { ascending: false })
-            .limit(20);
+        const adherenceData = await sql`
+            SELECT * FROM medication_adherence WHERE pid = ${pid}
+            ORDER BY scheduled_date DESC LIMIT 20
+        `;
 
-        return {
-            success: true,
-            data: {
-                patient,
-                currentAppointment,
-                previousPrescriptions: previousPrescriptions || [],
-                adherenceData: adherenceData || [],
-            },
-        };
+        return { success: true, data: { patient: formattedPatient, currentAppointment, previousPrescriptions: previousPrescriptions || [], adherenceData: adherenceData || [] } };
     } catch (error) {
         console.error('Fetch patient data error:', error);
         return { success: false, error };
@@ -109,19 +66,10 @@ async function fetchPatientData(pid: string, aid?: string) {
 async function generatePrescriptionWithAI(data: any) {
     const { patient, currentAppointment, previousPrescriptions, adherenceData } = data;
 
-    // Prepare context for AI
-    const patientLocation = {
-        city: patient.city || 'Not specified',
-        state: patient.state || 'Not specified',
-        country: patient.country || 'India',
-    };
-
+    const patientLocation = { city: patient.city || 'Not specified', state: patient.state || 'Not specified', country: patient.country || 'India' };
     const currentSymptoms = currentAppointment?.chief_complaint || 'General consultation';
-
-    // Analyze adherence patterns
     const adherenceSummary = analyzeAdherence(adherenceData);
 
-    // Build comprehensive prompt with ALL available patient data
     const prompt = `You are Dr. Manas AI, an expert Ayurvedic physician assistant. Generate a comprehensive, personalized prescription based on the following patient data:
 
 **PATIENT PROFILE:**
@@ -147,7 +95,6 @@ ${previousPrescriptions.length > 0
   - Date: ${new Date(p.created_at).toLocaleDateString()}
   - Diagnosis: ${p.diagnosis}
   - Medicines: ${JSON.stringify(p.medicines).slice(0, 150)}
-  - Adherence: ${p.ai_suggestions?.adherence || 'Not tracked'}
 `).join('\n')
             : 'No previous prescriptions'}
 
@@ -194,35 +141,24 @@ RESPOND ONLY WITH VALID JSON. No additional text.`;
         const response = result.response;
         const text = response.text();
 
-        // Parse JSON from response
         const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-            throw new Error('No valid JSON in AI response');
-        }
+        if (!jsonMatch) throw new Error('No valid JSON in AI response');
 
         const prescription = JSON.parse(jsonMatch[0]);
 
-        // Sanitize medicine durations to simple formats
         if (prescription.medicines && Array.isArray(prescription.medicines)) {
             prescription.medicines = prescription.medicines.map((med: any) => ({
-                ...med,
-                // Clean up duration to simple format
-                duration: simplifyDuration(med.duration || '7 days')
+                ...med, duration: simplifyDuration(med.duration || '7 days')
             }));
         }
 
-        // Calculate follow-up date
         const followUpDate = new Date();
         followUpDate.setDate(followUpDate.getDate() + (prescription.followUpDays || 7));
 
         return {
-            diagnosis: prescription.diagnosis,
-            symptoms: prescription.symptoms,
-            medicines: prescription.medicines,
-            instructions: prescription.instructions,
-            dietAdvice: prescription.dietAdvice,
-            followUpDate: followUpDate.toISOString().split('T')[0],
-            safetyNotes: prescription.safetyNotes || '',
+            diagnosis: prescription.diagnosis, symptoms: prescription.symptoms, medicines: prescription.medicines,
+            instructions: prescription.instructions, dietAdvice: prescription.dietAdvice,
+            followUpDate: followUpDate.toISOString().split('T')[0], safetyNotes: prescription.safetyNotes || '',
         };
     } catch (error) {
         console.error('Gemini AI Error:', error);
@@ -231,45 +167,19 @@ RESPOND ONLY WITH VALID JSON. No additional text.`;
 }
 
 function simplifyDuration(duration: string): string {
-    // Extract numbers and common time units
     const durationLower = duration.toLowerCase();
-
-    // Try to extract simple duration patterns
-    if (durationLower.includes('day')) {
-        const match = durationLower.match(/(\d+)\s*day/);
-        return match ? `${match[1]} days` : '7 days';
-    }
-    if (durationLower.includes('week')) {
-        const match = durationLower.match(/(\d+)\s*week/);
-        return match ? `${match[1]} weeks` : '2 weeks';
-    }
-    if (durationLower.includes('month')) {
-        const match = durationLower.match(/(\d+)\s*month/);
-        return match ? `${match[1]} months` : '1 month';
-    }
-    if (durationLower.includes('year')) {
-        const match = durationLower.match(/(\d+)\s*year/);
-        return match ? `${match[1]} years` : '1 year';
-    }
-
-    // If already simple format, return as is
-    if (/^\d+\s+(day|days|week|weeks|month|months|year|years)$/i.test(duration.trim())) {
-        return duration.trim();
-    }
-
-    // Default fallback
+    if (durationLower.includes('day')) { const match = durationLower.match(/(\d+)\s*day/); return match ? `${match[1]} days` : '7 days'; }
+    if (durationLower.includes('week')) { const match = durationLower.match(/(\d+)\s*week/); return match ? `${match[1]} weeks` : '2 weeks'; }
+    if (durationLower.includes('month')) { const match = durationLower.match(/(\d+)\s*month/); return match ? `${match[1]} months` : '1 month'; }
+    if (durationLower.includes('year')) { const match = durationLower.match(/(\d+)\s*year/); return match ? `${match[1]} years` : '1 year'; }
+    if (/^\d+\s+(day|days|week|weeks|month|months|year|years)$/i.test(duration.trim())) return duration.trim();
     return '7 days';
 }
 
 function analyzeAdherence(adherenceData: any[]): string {
-    if (!adherenceData || adherenceData.length === 0) {
-        return 'No adherence data available';
-    }
-
+    if (!adherenceData || adherenceData.length === 0) return 'No adherence data available';
     const total = adherenceData.length;
-    const taken = adherenceData.filter((a) => a.is_taken).length;
-    const skipped = adherenceData.filter((a) => a.is_skipped).length;
-    const adherenceRate = ((taken / total) * 100).toFixed(0);
-
-    return `Adherence Rate: ${adherenceRate}% (${taken}/${total} doses taken, ${skipped} skipped)`;
+    const taken = adherenceData.filter(a => a.is_taken).length;
+    const skipped = adherenceData.filter(a => a.is_skipped).length;
+    return `Adherence Rate: ${((taken / total) * 100).toFixed(0)}% (${taken}/${total} doses taken, ${skipped} skipped)`;
 }

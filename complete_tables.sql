@@ -216,6 +216,11 @@ create table public.clinics (
 
 create index IF not exists idx_clinics_uid on public.clinics using btree (uid) TABLESPACE pg_default;
 
+create trigger trigger_sync_clinic_details
+after
+update OF clinic_name on clinics for EACH row
+execute FUNCTION sync_clinic_name_to_doctors ();
+
 create trigger update_clinics_updated_at BEFORE
 update on clinics for EACH row
 execute FUNCTION update_updated_at_column ();

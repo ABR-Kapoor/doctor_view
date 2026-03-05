@@ -1,13 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+﻿import { NextRequest, NextResponse } from 'next/server';
+import sql from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 export async function GET(request: NextRequest) {
     try {
@@ -18,40 +13,23 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'User ID required' }, { status: 400 });
         }
 
-        // Get user and doctor data
-        const { data: user } = await supabase
-            .from('users')
-            .select('*')
-            .eq('uid', uid)
-            .single();
+        const [user] = await sql`SELECT * FROM users WHERE uid = ${uid}`;
 
-        const { data: doctor } = await supabase
-            .from('doctors')
-            .select(`
-                *,
-                clinics:clinic_id (
-                    clinic_id,
-                    clinic_name,
-                    city,
-                    state
-                )
-            `)
-            .eq('uid', uid)
-            .single();
+        const [doctor] = await sql`
+            SELECT d.*, c.clinic_id as c_clinic_id, c.clinic_name as c_clinic_name, c.city as c_city, c.state as c_state
+            FROM doctors d
+            LEFT JOIN clinics c ON d.clinic_id = c.clinic_id
+            WHERE d.uid = ${uid}
+        `;
 
-        // Combine user's profile_image_url with doctor data and clinic info
         const doctorWithImage = doctor ? {
             ...doctor,
             profile_image_url: user?.profile_image_url || null,
-            // Override clinic_name with the actual clinic name from clinics table if clinic_id exists
-            clinic_name: doctor.clinics?.clinic_name || doctor.clinic_name || ''
+            clinic_name: doctor.c_clinic_name || doctor.clinic_name || '',
+            clinics: doctor.c_clinic_id ? { clinic_id: doctor.c_clinic_id, clinic_name: doctor.c_clinic_name, city: doctor.c_city, state: doctor.c_state } : null
         } : null;
 
-        return NextResponse.json({
-            success: true,
-            user,
-            doctor: doctorWithImage,
-        });
+        return NextResponse.json({ success: true, user, doctor: doctorWithImage });
     } catch (error) {
         console.error('Profile fetch error:', error);
         return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
@@ -66,93 +44,66 @@ export async function PATCH(request: NextRequest) {
             return NextResponse.json({ error: 'User ID required' }, { status: 400 });
         }
 
-        // Update user table
         if (user) {
-            // Build update object dynamically to avoid unnecessary updates
-            const updateData: any = {
-                name: user.name,
-            };
-
-            // Only include phone if provided and not empty
-            if (user.phone && user.phone.trim() !== '') {
-                updateData.phone = user.phone;
-            }
-
-            // Only include profile_image_url if provided
-            if (user.profile_image_url !== undefined) {
-                updateData.profile_image_url = user.profile_image_url;
-            }
-
-            const { error: userError } = await supabase
-                .from('users')
-                .update(updateData)
-                .eq('uid', uid);
-
-            if (userError) {
-                // Handle duplicate phone error with friendly message
-                if (userError.code === '23505' && userError.message.includes('phone')) {
-                    return NextResponse.json({ 
-                        error: 'This phone number is already registered to another user.' 
-                    }, { status: 400 });
+            const phone = user.phone && user.phone.trim() !== '' ? user.phone : null;
+            try {
+                await sql`
+                    UPDATE users
+                    SET name = ${user.name},
+                        phone = COALESCE(${phone}, phone),
+                        profile_image_url = COALESCE(${user.profile_image_url ?? null}, profile_image_url)
+                    WHERE uid = ${uid}
+                `;
+            } catch (e: any) {
+                if (e.code === '23505' && e.message?.includes('phone')) {
+                    return NextResponse.json({ error: 'This phone number is already registered to another user.' }, { status: 400 });
                 }
-                throw userError;
+                throw e;
             }
         }
 
-        // Update or create doctor record
         if (doctor) {
-            const { data: existingDoctor } = await supabase
-                .from('doctors')
-                .select('did')
-                .eq('uid', uid)
-                .single();
+            const [existingDoctor] = await sql`SELECT did FROM doctors WHERE uid = ${uid}`;
+            const regNum = doctor.registration_number && doctor.registration_number.trim() !== '' ? doctor.registration_number : null;
 
-            if (existingDoctor) {
-                // Update existing doctor
-                const updateData: any = {
-                    specialization: doctor.specialization, // Array of specializations
-                    custom_specializations: doctor.custom_specializations, // Custom SEO keywords
-                    qualification: doctor.qualification,
-                    registration_number: doctor.registration_number,
-                    years_of_experience: doctor.years_of_experience,
-                    consultation_fee: doctor.consultation_fee,
-                    bio: doctor.bio,
-                    clinic_id: doctor.clinic_id, // Allow doctors to select/change their clinic
-                    address_line1: doctor.address_line1,
-                    address_line2: doctor.address_line2,
-                    city: doctor.city,
-                    state: doctor.state,
-                    postal_code: doctor.postal_code,
-                    languages: doctor.languages,
-                };
-
-                // Only save clinic_name if no clinic_id (independent doctor)
-                if (!doctor.clinic_id) {
-                    updateData.clinic_name = doctor.clinic_name;
+            try {
+                if (existingDoctor) {
+                    await sql`
+                        UPDATE doctors SET
+                            specialization = ${doctor.specialization || null},
+                            custom_specializations = ${doctor.custom_specializations || null},
+                            qualification = ${doctor.qualification || null},
+                            registration_number = ${regNum},
+                            years_of_experience = ${doctor.years_of_experience || null},
+                            consultation_fee = ${doctor.consultation_fee || null},
+                            bio = ${doctor.bio || null},
+                            clinic_id = ${doctor.clinic_id || null},
+                            clinic_name = ${!doctor.clinic_id ? (doctor.clinic_name || null) : null},
+                            address_line1 = ${doctor.address_line1 || null},
+                            address_line2 = ${doctor.address_line2 || null},
+                            city = ${doctor.city || null},
+                            state = ${doctor.state || null},
+                            postal_code = ${doctor.postal_code || null},
+                            languages = ${doctor.languages || null}
+                        WHERE uid = ${uid}
+                    `;
+                } else {
+                    await sql`
+                        INSERT INTO doctors (uid, specialization, custom_specializations, qualification, registration_number, years_of_experience, consultation_fee, bio, clinic_id, clinic_name, address_line1, address_line2, city, state, postal_code, languages)
+                        VALUES (${uid}, ${doctor.specialization || null}, ${doctor.custom_specializations || null}, ${doctor.qualification || null}, ${regNum}, ${doctor.years_of_experience || null}, ${doctor.consultation_fee || null}, ${doctor.bio || null}, ${doctor.clinic_id || null}, ${doctor.clinic_name || null}, ${doctor.address_line1 || null}, ${doctor.address_line2 || null}, ${doctor.city || null}, ${doctor.state || null}, ${doctor.postal_code || null}, ${doctor.languages || null})
+                    `;
                 }
-
-                const { error: doctorError } = await supabase
-                    .from('doctors')
-                    .update(updateData)
-                    .eq('uid', uid);
-
-                if (doctorError) throw doctorError;
-            } else {
-                // Create new doctor record
-                const { error: createError } = await supabase
-                    .from('doctors')
-                    .insert({
-                        uid,
-                        ...doctor,
-                    });
-
-                if (createError) throw createError;
+            } catch (e: any) {
+                if (e.code === '23505' && e.message?.includes('registration_number')) {
+                    return NextResponse.json({ error: 'This registration number is already registered to another doctor.' }, { status: 400 });
+                }
+                throw e;
             }
         }
 
         return NextResponse.json({ success: true, message: 'Profile updated successfully' });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Profile update error:', error);
-        return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to update profile', details: error.message }, { status: 500 });
     }
 }

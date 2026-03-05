@@ -1,0 +1,17 @@
+﻿app/api/doctor/appointments/route.ts(46,61): error TS2339: Property 'status' does not exist on type '{ complaint_description: any; payment_status: string; patient: { pid: any; uid: any; user: { name: any; email: any; phone: any; profile_image_url: any; }; } | null; }'.
+app/api/doctor/appointments/route.ts(47,63): error TS2339: Property 'status' does not exist on type '{ complaint_description: any; payment_status: string; patient: { pid: any; uid: any; user: { name: any; email: any; phone: any; profile_image_url: any; }; } | null; }'.
+app/api/doctor/appointments/route.ts(47,91): error TS2339: Property 'scheduled_date' does not exist on type '{ complaint_description: any; payment_status: string; patient: { pid: any; uid: any; user: { name: any; email: any; phone: any; profile_image_url: any; }; } | null; }'.
+app/api/doctor/appointments/route.ts(48,59): error TS2339: Property 'scheduled_date' does not exist on type '{ complaint_description: any; payment_status: string; patient: { pid: any; uid: any; user: { name: any; email: any; phone: any; profile_image_url: any; }; } | null; }'.
+app/api/doctor/appointments/route.ts(48,146): error TS2339: Property 'status' does not exist on type '{ complaint_description: any; payment_status: string; patient: { pid: any; uid: any; user: { name: any; email: any; phone: any; profile_image_url: any; }; } | null; }'.
+app/api/doctor/appointments/route.ts(49,63): error TS2339: Property 'status' does not exist on type '{ complaint_description: any; payment_status: string; patient: { pid: any; uid: any; user: { name: any; email: any; phone: any; profile_image_url: any; }; } | null; }'.
+app/api/doctor/appointments/route.ts(50,63): error TS2339: Property 'status' does not exist on type '{ complaint_description: any; payment_status: string; patient: { pid: any; uid: any; user: { name: any; email: any; phone: any; profile_image_url: any; }; } | null; }'.
+doctor_view/lib/shared/auth-helpers.ts(4,21): error TS2305: Module '"./types"' has no exported member 'UserRole'.
+doctor_view/lib/shared/db-queries.ts(12,5): error TS2305: Module '"./types"' has no exported member 'AppointmentStatus'.
+doctor_view/lib/shared/utils.ts(4,5): error TS2305: Module '"./types"' has no exported member 'MedicationChartData'.
+doctor_view/lib/shared/utils.ts(5,5): error TS2305: Module '"./types"' has no exported member 'AdherenceDonutData'.
+doctor_view/lib/shared/utils.ts(7,5): error TS2305: Module '"./types"' has no exported member 'AppointmentTimelineData'.
+lib/shared/auth-helpers.ts(4,21): error TS2305: Module '"./types"' has no exported member 'UserRole'.
+lib/shared/db-queries.ts(12,5): error TS2305: Module '"./types"' has no exported member 'AppointmentStatus'.
+lib/shared/utils.ts(4,5): error TS2305: Module '"./types"' has no exported member 'MedicationChartData'.
+lib/shared/utils.ts(5,5): error TS2305: Module '"./types"' has no exported member 'AdherenceDonutData'.
+lib/shared/utils.ts(7,5): error TS2305: Module '"./types"' has no exported member 'AppointmentTimelineData'.

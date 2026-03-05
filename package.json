@@ -29,6 +29,7 @@
         "lingo.dev": "^0.125.5",
         "lucide-react": "^0.294.0",
         "next": "^14.2.25",
+        "postgres": "^3.4.8",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-hot-toast": "^2.4.1",

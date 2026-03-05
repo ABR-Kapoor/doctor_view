@@ -1,30 +1,25 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import sql from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-/**
- * GET: List all clinics for doctor selection
- * Public endpoint - doctors can see all available clinics
- */
 export async function GET() {
   try {
-    const { data: clinics, error } = await supabaseAdmin
-      .from('clinics')
-      .select('*')
-      .order('clinic_name', { ascending: true });
+    const clinics = await sql`SELECT * FROM clinics ORDER BY clinic_name ASC`;
 
-    if (error) {
-      console.error('Error fetching clinics:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ 
-      success: true, 
-      clinics: clinics || [] 
+    return NextResponse.json({
+      success: true,
+      clinics: clinics || [],
+      timestamp: new Date().toISOString()
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'Pragma': 'no-cache', 'Expires': '0', 'Surrogate-Control': 'no-store'
+      }
     });
   } catch (error: any) {
     console.error('Unexpected error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message, clinics: [] }, { status: 500 });
   }
 }
