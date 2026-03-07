@@ -1,6 +1,6 @@
 ﻿import { redirect } from 'next/navigation';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
-import { supabase } from '@/lib/shared/supabase';
+import sql from '@/lib/db';
 import AuthSync from '@/components/AuthSync';
 import DashboardLayoutClient from '@/app/components/DashboardLayoutClient';
 import DoctorProfileCheck from '@/components/DoctorProfileCheck';
@@ -21,11 +21,9 @@ export default async function DoctorDashboardLayout({
   // Fetch user data from database including name
   let dbUserData = null;
   if (user?.id) {
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role, name, uid')
-      .eq('auth_id', user.id)
-      .single();
+    const [userData] = await sql`
+        SELECT role, name, uid FROM users WHERE auth_id = ${user.id}
+    `;
 
     dbUserData = userData;
 

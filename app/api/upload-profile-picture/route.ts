@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import sql from '@/lib/db';
+import { createNhostClient, withAdminSession } from '@nhost/nhost-js';
 
-// Keep Supabase client ONLY for Storage (S3 bucket) operations
-const supabaseStorage = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const NHOST_ADMIN_SECRET = process.env.NHOST_ADMIN_SECRET!;
+
+const nhost = createNhostClient({
+    subdomain: process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN || 'ynwkhelqhehjlxlhhjfj',
+    region: process.env.NEXT_PUBLIC_NHOST_REGION || 'ap-south-1',
+    configure: [
+        withAdminSession({
+            adminSecret: NHOST_ADMIN_SECRET,
+            role: 'admin'
+        })
+    ]
+});
 
 export async function POST(request: NextRequest) {
     try {
@@ -28,30 +35,38 @@ export async function POST(request: NextRequest) {
 
         const fileExt = file.name.split('.').pop();
         const fileName = `${uid}-${Date.now()}.${fileExt}`;
-        const filePath = `profile-pictures/${fileName}`;
 
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
+        const nhostFile = new File([buffer], fileName, { type: file.type });
 
-        // Upload to Supabase Storage (S3 bucket - kept as-is)
-        const { data: uploadData, error: uploadError } = await supabaseStorage.storage
-            .from('avatars')
-            .upload(filePath, buffer, { contentType: file.type, upsert: true });
+        // Upload to Nhost Storage using the Nhost client v4 API
+        const { body } = await nhost.storage.uploadFiles({
+            'file[]': [nhostFile],
+            'bucket-id': 'avatars',
+        });
 
-        if (uploadError) {
-            console.error('Upload error:', uploadError);
-            return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
+        const fileMetadata = body.processedFiles[0];
+
+        if (!fileMetadata) {
+            return NextResponse.json({ error: 'Failed to upload file to Nhost Storage' }, { status: 500 });
         }
 
-        const { data: urlData } = supabaseStorage.storage.from('avatars').getPublicUrl(filePath);
-        const publicUrl = urlData.publicUrl;
+        const fileId = fileMetadata.id;
+        const storageUrl = nhost.storage.baseURL;
+        const publicUrl = `${storageUrl}/files/${fileId}`;
 
-        // Update user's profile_image_url using postgres.js (Neon)
+        // Update user's profile_image_url in Nhost Postgres (via postgres.js)
         await sql`UPDATE users SET profile_image_url = ${publicUrl} WHERE uid = ${uid}`;
 
-        return NextResponse.json({ success: true, url: publicUrl, message: 'Profile picture updated successfully' });
-    } catch (error) {
+        return NextResponse.json({
+            success: true,
+            url: publicUrl,
+            message: 'Profile picture updated successfully',
+        });
+    } catch (error: any) {
         console.error('Upload error:', error);
-        return NextResponse.json({ error: 'Failed to upload profile picture' }, { status: 500 });
+        const errorMessage = error.body?.error?.message || error.message || 'Failed to upload profile picture';
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }

@@ -1,6 +1,6 @@
 // AuraSutra - Authentication Helpers
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
-import { getUserByAuthId, createUser } from './db-queries';
+import sql from '@/lib/db';
 import type { User, UserRole } from './types';
 
 // Get current authenticated user from Kinde
@@ -35,10 +35,12 @@ export async function syncUser(role: UserRole = 'patient'): Promise<User | null>
         }
 
         // Try to get existing user
-        const { data: existingUser } = await getUserByAuthId(kindeUser.id);
+        const [existingUser] = await sql`
+            SELECT * FROM users WHERE auth_id = ${kindeUser.id}
+        `;
 
         if (existingUser) {
-            return existingUser;
+            return existingUser as unknown as User;
         }
 
         // Create new user if doesn't exist
@@ -52,8 +54,20 @@ export async function syncUser(role: UserRole = 'patient'): Promise<User | null>
             is_active: true,
         };
 
-        const { data: createdUser } = await createUser(newUser);
-        return createdUser;
+        const [createdUser] = await sql`
+            INSERT INTO users (auth_id, email, name, role, profile_image_url, is_verified, is_active)
+            VALUES (
+                ${newUser.auth_id || null}, 
+                ${newUser.email || null}, 
+                ${newUser.name || null}, 
+                ${newUser.role || null}, 
+                ${newUser.profile_image_url || null}, 
+                ${newUser.is_verified || false}, 
+                ${newUser.is_active || true}
+            )
+            RETURNING *
+        `;
+        return createdUser as unknown as User;
     } catch (error) {
         console.error('Error syncing user:', error);
         return null;
@@ -74,15 +88,17 @@ export async function requireAuth(requiredRoles?: UserRole[]) {
         return { error: 'Unauthorized', user: null };
     }
 
-    const { data: user } = await getUserByAuthId(kindeUser.id);
+    const [user] = await sql`
+        SELECT * FROM users WHERE auth_id = ${kindeUser.id}
+    `;
 
     if (!user) {
         return { error: 'User not found in database', user: null };
     }
 
-    if (requiredRoles && !hasRole(user, requiredRoles)) {
+    if (requiredRoles && !hasRole(user as User, requiredRoles)) {
         return { error: 'Forbidden: Insufficient permissions', user: null };
     }
 
-    return { error: null, user };
+    return { error: null, user: user as User };
 }

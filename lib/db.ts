@@ -1,13 +1,14 @@
 import postgres from 'postgres';
 
-const connectionString = process.env.DATABASE_URL;
+const dbUrl = new URL(process.env.DATABASE_URL!);
 
-if (!connectionString) {
-    throw new Error('DATABASE_URL environment variable is not set');
-}
-
-const sql = postgres(connectionString, {
-    ssl: 'require',
+const sql = postgres({
+    host: dbUrl.hostname,
+    port: Number(dbUrl.port) || 5432,
+    database: dbUrl.pathname.replace(/^\//, ''),
+    username: dbUrl.username,
+    password: decodeURIComponent(dbUrl.password),
+    ssl: { rejectUnauthorized: false },
     max: 10,
     idle_timeout: 20,
     connect_timeout: 10,

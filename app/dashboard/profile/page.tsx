@@ -129,7 +129,7 @@ export default function DoctorProfilePage() {
   async function fetchProfile() {
     try {
       // Sync user
-      const syncResponse = await fetch('/api/sync-user');
+      const syncResponse = await fetch('/api/sync-user', { cache: 'no-store' });
       const { user } = await syncResponse.json();
 
       if (!user) {
@@ -140,7 +140,7 @@ export default function DoctorProfilePage() {
       setUid(user.uid);
 
       // Fetch profile
-      const response = await fetch(`/api/doctor/profile?uid=${user.uid}`);
+      const response = await fetch(`/api/doctor/profile?uid=${user.uid}&t=${Date.now()}`, { cache: 'no-store' });
       const data = await response.json();
 
       if (data.success) {
@@ -187,6 +187,7 @@ export default function DoctorProfilePage() {
           user: {
             name: formData.name,
             phone: formData.phone,
+            profile_image_url: profileImage,
           },
           doctor: {
             specialization: formData.specialization,
