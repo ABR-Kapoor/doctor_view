@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./public/Logos/logo.png" alt="AuraSutra Logo" width="120" />
+  <img src="./public/Logos/logo+name_whiteBg.png" alt="AuraSutra Logo" width="120" />
 </p>
 
 <h1 align="center">AuraSutra Doctor Portal</h1>
