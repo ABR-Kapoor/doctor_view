@@ -1,5 +1,0 @@
-﻿doctor_view/lib/shared/auth-helpers.ts(4,21): error TS2305: Module '"./types"' has no exported member 'UserRole'.
-doctor_view/lib/shared/db-queries.ts(12,5): error TS2305: Module '"./types"' has no exported member 'AppointmentStatus'.
-doctor_view/lib/shared/utils.ts(4,5): error TS2305: Module '"./types"' has no exported member 'MedicationChartData'.
-doctor_view/lib/shared/utils.ts(5,5): error TS2305: Module '"./types"' has no exported member 'AdherenceDonutData'.
-doctor_view/lib/shared/utils.ts(7,5): error TS2305: Module '"./types"' has no exported member 'AppointmentTimelineData'.
